@@ -1,0 +1,304 @@
+.landing-page {
+    min-height: 100vh;
+    color: var(--color-goldfinch-white);
+    background: var(--color-blue-jay-royal-blue);
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.landing-header {
+    display: flex;
+    align-items: center;
+    width: min(100% - 2rem, 72rem);
+    margin-inline: auto;
+    padding: 1.5rem 0;
+    gap: 2rem;
+}
+
+.landing-header > a {
+    color: inherit;
+    font-weight: 800;
+    text-decoration: none;
+    text-transform: uppercase;
+}
+
+.landing-header > a:hover,
+.landing-header > a:focus-visible {
+    text-decoration: underline;
+    text-underline-offset: 0.3rem;
+}
+
+.landing-header nav {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-left: auto;
+}
+
+.landing-header nav a {
+    color: inherit;
+    font-weight: 800;
+    text-decoration: none;
+    text-transform: uppercase;
+}
+
+.landing-header nav a:hover,
+.landing-header nav a:focus-visible {
+    text-decoration: underline;
+    text-underline-offset: 0.3rem;
+}
+
+.landing-header nav .nav-signup {
+    padding: 0.8rem 1.25rem;
+    color: var(--color-goldfinch-jet-black);
+    background: var(--color-goldfinch-white);
+    border: 3px solid var(--color-goldfinch-jet-black);
+}
+
+.landing-header nav .nav-signup:hover,
+.landing-header nav .nav-signup:focus-visible {
+    color: var(--color-goldfinch-jet-black);
+    background: var(--color-goldfinch-gold);
+    text-decoration: none;
+}
+
+.hero,
+.features {
+    width: min(100% - 2rem, 72rem);
+    margin-inline: auto;
+}
+
+.hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(18rem, 0.8fr);
+    align-items: center;
+    gap: 3rem;
+    padding: 4rem 0 5rem;
+}
+
+.eyebrow {
+    color: var(--color-goldfinch-gold);
+    font-size: 0.8rem;
+    font-weight: 900;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.hero h1 {
+    max-width: 42rem;
+    margin-top: 1rem;
+    font-size: clamp(3rem, 7vw, 6rem);
+    line-height: 0.9;
+    letter-spacing: -0.08em;
+}
+
+.hero-description {
+    max-width: 32rem;
+    margin-top: 1.5rem;
+    font-size: 1.2rem;
+    line-height: 1.5;
+}
+
+.hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.primary-button,
+.secondary-button {
+    display: inline-flex;
+    align-items: center;
+    min-height: 3.5rem;
+    font-weight: 900;
+    text-decoration: none;
+    text-transform: uppercase;
+}
+
+.primary-button {
+    padding: 0.8rem 1.25rem;
+    color: var(--color-goldfinch-white);
+    background: var(--color-cardinal-red);
+    box-shadow: 6px 6px 0 var(--color-goldfinch-jet-black);
+}
+
+.secondary-button {
+    padding: 0.8rem 1.25rem;
+    color: inherit;
+    border: 3px solid var(--color-goldfinch-white);
+}
+
+.primary-button:hover,
+.primary-button:focus-visible {
+    background: var(--color-cardinal-crimson);
+}
+
+.secondary-button:hover,
+.secondary-button:focus-visible {
+    color: var(--color-goldfinch-jet-black);
+    background: var(--color-goldfinch-white);
+    box-shadow: 6px 6px 0 var(--color-goldfinch-jet-black);
+}
+
+.primary-button:active,
+.secondary-button:active,
+.nav-signup:active {
+    transform: translate(4px, 4px);
+}
+
+.primary-button:active,
+.landing-header nav .nav-signup:active {
+    box-shadow: 2px 2px 0 var(--color-goldfinch-jet-black);
+}
+
+.hero-art {
+    position: relative;
+    min-height: 25rem;
+}
+
+.art-shape {
+    position: absolute;
+    width: 14rem;
+    aspect-ratio: 1;
+    border: 5px solid var(--color-goldfinch-jet-black);
+}
+
+.art-shape-one {
+    top: 10%;
+    right: 15%;
+    background: var(--color-goldfinch-gold);
+    transform: rotate(12deg);
+}
+
+.art-shape-two {
+    right: 35%;
+    bottom: 10%;
+    background: var(--color-cardinal-red);
+    transform: rotate(-15deg);
+}
+
+.features {
+    padding: 3rem 0 4rem;
+    border-top: 1px solid rgb(255 255 255 / 35%);
+}
+
+.features h2 {
+    margin-top: 0.75rem;
+    font-size: clamp(2rem, 5vw, 4rem);
+}
+
+.feature-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.feature-grid article span {
+    color: var(--color-goldfinch-gold);
+    font-weight: 900;
+}
+
+.feature-grid h3 {
+    margin-top: 0.75rem;
+}
+
+.feature-grid p {
+    margin-top: 0.5rem;
+    line-height: 1.5;
+}
+
+.skip-link {
+    position: absolute;
+    left: 1rem;
+    top: -4rem;
+    padding: 0.75rem 1rem;
+    color: var(--color-goldfinch-jet-black);
+    background: var(--color-goldfinch-white);
+    z-index: 2;
+}
+
+.skip-link:focus {
+    top: 1rem;
+}
+
+.landing-page a:focus-visible {
+    outline: 3px solid var(--color-goldfinch-white);
+    outline-offset: 3px;
+    box-shadow: 0 0 0 6px var(--color-goldfinch-jet-black);
+}
+
+@media (max-width: 48rem) {
+    .hero {
+        display: block;
+        padding: 3rem 0 4rem;
+    }
+
+    .landing-header {
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .landing-header nav {
+        flex-wrap: wrap;
+        width: 100%;
+        justify-content: flex-end;
+        gap: 0.75rem;
+    }
+
+    .feature-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .hero-art {
+        min-height: 16rem;
+        margin-top: 2rem;
+    }
+
+    .hero h1 {
+        font-size: clamp(3rem, 15vw, 5rem);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .primary-button:active,
+    .secondary-button:active,
+    .landing-header nav .nav-signup:active {
+        transform: none;
+    }
+
+    .art-shape-one,
+    .art-shape-two {
+        transform: none;
+    }
+}
+
+@media (forced-colors: active) {
+    .landing-page,
+    .primary-button,
+    .secondary-button,
+    .landing-header nav .nav-signup {
+        border: 2px solid ButtonText;
+        box-shadow: none;
+    }
+}
+.about {
+    width: min(100% - 2rem, 72rem);
+    margin-inline: auto;
+    padding: 4rem 0 6rem;
+    border-top: 1px solid rgb(255 255 255 / 35%);
+}
+
+.about h2 {
+    max-width: 48rem;
+    margin-top: 0.75rem;
+    font-size: clamp(2rem, 5vw, 4rem);
+    line-height: 0.95;
+}
+
+.about > p:last-child {
+    max-width: 36rem;
+    margin-top: 1.5rem;
+    font-size: 1.15rem;
+    line-height: 1.5;
+}
