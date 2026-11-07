@@ -21,6 +21,7 @@ jobs:
         run: |
           npm ci
           npm run build
+        working-directory: ./client
 
       - name: Deploy to Vultr via SCP
         uses: appleboy/scp-action@v0.1.7
@@ -28,6 +29,6 @@ jobs:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: "dist/*" # Change to "build/*" if your output folder is named 'build'
+          source: "client/dist/*"
           target: "/var/www/html/"
-          strip_components: 1 # Flattens the dist folder so index.html lands directly in /var/www/html/
+          strip_components: 2
