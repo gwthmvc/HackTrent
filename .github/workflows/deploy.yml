@@ -2,7 +2,8 @@ name: Deploy React App to Vultr
 
 "on":
   push:
-    branches: [ "main" ]
+    branches: ["main"]
+  workflow_dispatch:
 
 jobs:
   build-and-deploy:
@@ -16,10 +17,13 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '24'
+          cache: npm
+          cache-dependency-path: client/package-lock.json
 
-      - name: Install Dependencies & Build
+      - name: Install Dependencies, Lint & Build
         run: |
           npm ci
+          npm run lint
           npm run build
         working-directory: ./client
 
