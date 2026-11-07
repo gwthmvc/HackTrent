@@ -2,6 +2,7 @@ import '../styles/HomePage.css'
 import { useAuth0 } from '@auth0/auth0-react'
 import { useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router'
+import type { TripPreferences } from '../types/trip'
 
 export default function HomePage() {
     const { logout } = useAuth0();
@@ -18,7 +19,18 @@ export default function HomePage() {
 
     const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        navigate('/dashboard');
+        const formData = new FormData(event.currentTarget);
+        const preferences: TripPreferences = {
+            prompt: String(formData.get('tripPrompt') ?? ''),
+            location: String(formData.get('tripLocation') ?? ''),
+            date: String(formData.get('date') ?? ''),
+            departureTime: String(formData.get('departureTime') ?? ''),
+            returnTime: String(formData.get('returnTime') ?? ''),
+            interests: String(formData.get('interests') ?? ''),
+            budget: Number(formData.get('budget') ?? budget),
+        };
+
+        navigate('/dashboard', { state: { preferences } });
     };
 
     return (
