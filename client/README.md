@@ -7,6 +7,10 @@ Auth0 application domain and client ID. Configure the Auth0 application
 callback URL, logout URL, and allowed web origins to include the URL used by
 Vite (for example, `http://localhost:5173`).
 
+For production, add `https://sloo.ca` to Auth0's Allowed Callback URLs, Allowed
+Logout URLs, and Allowed Web Origins. The app logs out through Auth0 and then
+redirects to the login page.
+
 For GitHub Actions deployments, add repository secrets named
 `VITE_AUTH0_DOMAIN` and `VITE_AUTH0_CLIENT_ID`. The deployment workflow passes
 these values to the production build.

@@ -25,9 +25,10 @@ export default function Register() {
                     'hacktrent_signup_message',
                     'Your account was created. Please log in with your new details.',
                 );
+                sessionStorage.setItem('hacktrent_logout_redirect', 'login');
                 void logout({
                     logoutParams: {
-                        returnTo: `${window.location.origin}/login`,
+                        returnTo: window.location.origin,
                     },
                 }).catch((logoutError: unknown) => {
                     setLocalError(

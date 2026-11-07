@@ -1,9 +1,18 @@
 import { Link } from 'react-router'
+import { useEffect } from 'react'
+import { useNavigate } from 'react-router'
 import '../styles/LandingPage.css'
 
 
 export default function LandingPage() {
+    const navigate = useNavigate();
 
+    useEffect(() => {
+        if (sessionStorage.getItem('hacktrent_logout_redirect') === 'login') {
+            sessionStorage.removeItem('hacktrent_logout_redirect');
+            navigate('/login', { replace: true });
+        }
+    }, [navigate]);
 
     return (
 

@@ -8,7 +8,7 @@ export default function HomePage() {
     const handleLogout = () => {
         void logout({
             logoutParams: {
-                returnTo: `${window.location.origin}/login`,
+                returnTo: window.location.origin,
             },
         });
     };
