@@ -61,6 +61,9 @@ export default function Register() {
         sessionStorage.setItem(SIGNUP_COMPLETED_KEY, 'true');
         try {
             await loginWithRedirect({
+                appState: {
+                    returnTo: '/register',
+                },
                 authorizationParams: {
                     screen_hint: 'signup',
                 },

@@ -42,6 +42,9 @@ export default function Login() {
         setIsSubmitting(true);
         try {
             await loginWithRedirect({
+                appState: {
+                    returnTo: '/dashboard',
+                },
                 authorizationParams: {
                     prompt: 'login',
                 },

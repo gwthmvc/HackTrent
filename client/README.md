@@ -17,7 +17,9 @@ these values to the production build.
 
 Authentication is handled by Auth0's hosted login page. The login and
 registration pages redirect to Auth0, and `/home` and `/dashboard` require an
-authenticated session.
+authenticated session. Auth0 uses persistent browser storage so authenticated
+sessions survive a full-page refresh; internal navigation uses client-side
+router links to avoid unnecessary reloads.
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 

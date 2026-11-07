@@ -1,22 +1,18 @@
 import { Link } from 'react-router'
-import { useAuth0 } from '@auth0/auth0-react'
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router'
 import '../styles/LandingPage.css'
 
 
 export default function LandingPage() {
-    const { isAuthenticated, isLoading } = useAuth0();
     const navigate = useNavigate();
 
     useEffect(() => {
         if (sessionStorage.getItem('hacktrent_logout_redirect') === 'login') {
             sessionStorage.removeItem('hacktrent_logout_redirect');
             navigate('/login', { replace: true });
-        } else if (!isLoading && isAuthenticated) {
-            navigate('/dashboard', { replace: true });
         }
-    }, [isAuthenticated, isLoading, navigate]);
+    }, [navigate]);
 
     return (
 

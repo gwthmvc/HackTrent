@@ -1,5 +1,6 @@
 import '../styles/HomePage.css'
 import { useAuth0 } from '@auth0/auth0-react'
+import { Link } from 'react-router'
 
 
 export default function HomePage() {
@@ -19,12 +20,12 @@ export default function HomePage() {
 
             <div className="home-page">
                 <header className="home-header">
-                    <a className="home-brand" href="/home" aria-label="HackTrent home">
+                    <Link className="home-brand" to="/home" aria-label="HackTrent home">
                         HackTrent
-                    </a>
+                    </Link>
                     <nav aria-label="Dashboard navigation">
-                        <a href="/home" aria-current="page">Home</a>
-                        <a href="/dashboard">Dashboard</a>
+                        <Link to="/home" aria-current="page">Home</Link>
+                        <Link to="/dashboard">Dashboard</Link>
                         <button type="button" onClick={handleLogout}>Log out</button>
                     </nav>
                 </header>

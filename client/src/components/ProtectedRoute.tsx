@@ -5,7 +5,7 @@ export default function ProtectedRoute() {
     const { isAuthenticated, isLoading } = useAuth0();
 
     if (isLoading) {
-        return <p>Loading...</p>;
+        return <p role="status" aria-live="polite">Loading your session...</p>;
     }
 
     return isAuthenticated ? <Outlet /> : <Navigate to="/login" replace />;
