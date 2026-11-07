@@ -9,10 +9,12 @@ type LoginResponse = {
     key?: string;
     token?: string;
     access_token?: string;
+    accessToken?: string;
     user?: Record<string, unknown>;
     data?: LoginPayload;
     result?: LoginPayload;
     account?: Record<string, unknown>;
+    [key: string]: unknown; // Allows any other properties returned by your API
 };
 
 type LoginPayload = {
@@ -21,26 +23,37 @@ type LoginPayload = {
     key?: string;
     token?: string;
     access_token?: string;
+    accessToken?: string;
     user?: Record<string, unknown>;
     account?: Record<string, unknown>;
+    [key: string]: unknown;
 };
 
 function getLoginDetails(response: LoginResponse) {
-    const payload = response.data ?? response.result;
+    // 1. Log the response to your browser console (F12 -> Console) 
+    // so you can see what your backend is actually returning.
+    console.log("API Login Response:", response);
+
+    const payload = response.data ?? response.result ?? response;
+    
     const apiKey = response.api_key
         ?? response.apiKey
         ?? response.key
         ?? response.token
         ?? response.access_token
+        ?? response.accessToken
         ?? payload?.api_key
         ?? payload?.apiKey
         ?? payload?.key
         ?? payload?.token
-        ?? payload?.access_token;
+        ?? payload?.access_token
+        ?? payload?.accessToken;
+
     const user = response.user
         ?? response.account
         ?? payload?.user
-        ?? payload?.account;
+        ?? payload?.account
+        ?? payload; // Fallback if the payload itself represents the user/session
 
     return { apiKey, user };
 }
@@ -77,12 +90,16 @@ export default function Login(){
             });
             const { apiKey, user } = getLoginDetails(response);
 
-            if (!apiKey || !user) {
-                throw new Error('Login response did not include account details.');
+            // Relaxed check: if your backend only returns an API key/token 
+            // without a separate user object, this will still allow login.
+            if (!apiKey) {
+                throw new Error('Login response did not include an API key or token.');
             }
 
             localStorage.setItem('api_key', apiKey);
-            localStorage.setItem('user', JSON.stringify(user));
+            if (user) {
+                localStorage.setItem('user', JSON.stringify(user));
+            }
             navigate('/dashboard', { replace: true });
         } catch (error) {
             setErrorMsg(error instanceof Error ? error.message : 'Login failed.');
