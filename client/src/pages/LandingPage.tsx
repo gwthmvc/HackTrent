@@ -15,7 +15,7 @@ export default function LandingPage() {
 
                 <header className="landing-header">
                     <nav aria-label="Main navigation">
-                        <Link to="/" aria-label="Home">Home</Link>
+                        <Link to="/home" aria-label="Home">Home</Link>
                         <Link to="/dashboard" aria-label="Dashboard">Dashboard</Link>
                         <a href="#features">Features</a>
                         <a href="#about">About</a>
