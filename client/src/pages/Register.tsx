@@ -3,7 +3,6 @@ import { useEffect, useRef, useState, type SubmitEvent } from 'react'
 import { useNavigate } from 'react-router'
 import { post } from '../services/api'
 
-
 export default function Register(){
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
