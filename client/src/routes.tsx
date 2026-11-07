@@ -1,13 +1,13 @@
 import { Outlet, type RouteObject } from 'react-router';
 
 
-import App from './App';
 import Dashboard from './pages/Dashboard';
 import HomePage from './pages/HomePage';
 import Login from './pages/Login';
 
 import Register from './pages/Register';
 import ErrorPage from './pages/ErrorPage';
+import LandingPage from './pages/LandingPage';
 
 const routes: RouteObject[] = [
   {
@@ -17,7 +17,7 @@ const routes: RouteObject[] = [
     children: [
   {
     path: '/',
-    element: <App />,
+    element: <LandingPage />,
   },
   {
     path: '/home',
