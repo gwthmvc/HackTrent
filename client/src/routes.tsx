@@ -8,6 +8,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import ErrorPage from './pages/ErrorPage';
 import LandingPage from './pages/LandingPage';
+import ProtectedRoute from './components/ProtectedRoute';
 
 const routes: RouteObject[] = [
   {
@@ -20,12 +21,17 @@ const routes: RouteObject[] = [
     element: <LandingPage />,
   },
   {
-    path: '/home',
-    element: <HomePage />,
-  },
-  {
-    path: '/dashboard',
-    element: <Dashboard />,
+    element: <ProtectedRoute />,
+    children: [
+      {
+        path: '/home',
+        element: <HomePage />,
+      },
+      {
+        path: '/dashboard',
+        element: <Dashboard />,
+      },
+    ],
   },
   {
     path: '/login',

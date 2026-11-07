@@ -1,7 +1,18 @@
 import '../styles/HomePage.css'
+import { useAuth0 } from '@auth0/auth0-react'
 
 
 export default function HomePage() {
+    const { logout } = useAuth0();
+
+    const handleLogout = () => {
+        void logout({
+            logoutParams: {
+                returnTo: `${window.location.origin}/login`,
+            },
+        });
+    };
+
     return (
         <>
             <title>Home | HackTrent</title>
@@ -14,7 +25,7 @@ export default function HomePage() {
                     <nav aria-label="Dashboard navigation">
                         <a href="/home" aria-current="page">Home</a>
                         <a href="/dashboard">Dashboard</a>
-                        <a href="/login">Log out</a>
+                        <button type="button" onClick={handleLogout}>Log out</button>
                     </nav>
                 </header>
 

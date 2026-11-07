@@ -1,13 +1,16 @@
 import '../styles/Dashboard.css'
-import { useNavigate } from 'react-router'
+import { useAuth0 } from '@auth0/auth0-react'
 
 
 export default function Dashboard(){
-    const navigate = useNavigate();
+    const { logout } = useAuth0();
 
     const handleLogout = () => {
-        localStorage.clear();
-        navigate('/login');
+        void logout({
+            logoutParams: {
+                returnTo: `${window.location.origin}/login`,
+            },
+        });
     };
 
     return(

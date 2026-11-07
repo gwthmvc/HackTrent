@@ -1,5 +1,16 @@
 # React + TypeScript + Vite
 
+## Auth0 configuration
+
+Copy `.env.example` to `.env.local` and replace the placeholder values with the
+Auth0 application domain and client ID. Configure the Auth0 application
+callback URL, logout URL, and allowed web origins to include the URL used by
+Vite (for example, `http://localhost:5173`).
+
+Authentication is handled by Auth0's hosted login page. The login and
+registration pages redirect to Auth0, and `/home` and `/dashboard` require an
+authenticated session.
+
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
 Currently, two official plugins are available:
