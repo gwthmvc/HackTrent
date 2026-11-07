@@ -15,7 +15,7 @@ export default function Auth0ProviderWithNavigate({ children }: PropsWithChildre
                 redirect_uri: window.location.origin,
             }}
             onRedirectCallback={(appState) => {
-                navigate(appState?.returnTo ?? '/dashboard', { replace: true });
+                navigate(appState?.returnTo ?? '/home', { replace: true });
             }}
         >
             {children}

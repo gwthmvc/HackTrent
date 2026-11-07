@@ -28,8 +28,12 @@
     gap: 1.5rem;
 }
 
-.home-header nav a {
+.home-header nav a,
+.home-header nav button {
     color: var(--color-cardinal-charcoal);
+    background: none;
+    border: 0;
+    font: inherit;
     font-size: 0.8rem;
     font-weight: 800;
     text-decoration: none;
@@ -38,28 +42,36 @@
 
 .home-header nav a:hover,
 .home-header nav a:focus-visible,
-.map-footer a:hover,
-.map-footer a:focus-visible {
+.home-header nav button:hover,
+.home-header nav button:focus-visible {
     color: var(--color-cardinal-red);
+    cursor: pointer;
     text-decoration: underline;
     text-underline-offset: 0.25rem;
 }
 
 .home-content {
-    width: min(100% - 3rem, 80rem);
+    width: min(100% - 3rem, 58rem);
     margin-inline: auto;
     padding: 3rem 0 5rem;
 }
 
-.home-intro {
+.planner-card {
+    padding: clamp(1.5rem, 4vw, 3rem);
+    background: var(--color-goldfinch-white);
+    border: 3px solid var(--color-blue-jay-midnight-black);
+    box-shadow: 8px 8px 0 var(--color-blue-jay-royal-blue);
+}
+
+.planner-heading {
     display: flex;
-    align-items: end;
+    align-items: start;
     justify-content: space-between;
     gap: 2rem;
-    padding-bottom: 2.5rem;
 }
 
 .home-eyebrow {
+    margin: 0;
     color: var(--color-cardinal-red);
     font-size: 0.75rem;
     font-weight: 900;
@@ -67,68 +79,24 @@
     text-transform: uppercase;
 }
 
-.home-intro h1 {
-    margin-top: 0.65rem;
+.planner-heading h1 {
+    margin-top: 0.5rem;
     color: var(--color-blue-jay-royal-blue);
-    font-size: clamp(2.4rem, 5vw, 4.5rem);
-    line-height: 0.95;
-    letter-spacing: -0.07em;
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    line-height: 1;
+    letter-spacing: -0.06em;
 }
 
-.home-intro p:last-child {
-    max-width: 34rem;
+.planner-intro {
+    max-width: 35rem;
     margin-top: 1rem;
     color: var(--color-cardinal-charcoal);
-    font-size: 1.05rem;
+    font-size: 1rem;
+    line-height: 1.5;
 }
 
-.home-date {
-    display: flex;
-    align-items: center;
-    gap: 0.65rem;
-    padding: 0.75rem 1rem;
-    color: var(--color-blue-jay-royal-blue);
-    background: var(--color-goldfinch-white);
-    border: 2px solid var(--color-blue-jay-royal-blue);
-    font-size: 0.8rem;
-    font-weight: 800;
-    text-transform: uppercase;
-}
-
-.home-date-marker {
-    color: var(--color-cardinal-red);
-    font-size: 0.8rem;
-}
-
-.home-dashboard-grid {
-    display: grid;
-    grid-template-columns: minmax(0, 1.5fr) minmax(20rem, 0.85fr);
-    gap: 1.5rem;
-}
-
-.home-card {
-    min-width: 0;
-    padding: 1.5rem;
-    background: var(--color-goldfinch-white);
-    border: 3px solid var(--color-blue-jay-midnight-black);
-    box-shadow: 7px 7px 0 var(--color-blue-jay-royal-blue);
-}
-
-.card-heading {
-    display: flex;
-    align-items: start;
-    justify-content: space-between;
-    gap: 1rem;
-}
-
-.card-heading h2 {
-    margin-top: 0.4rem;
-    font-size: 1.65rem;
-    letter-spacing: -0.04em;
-}
-
-.card-status {
-    padding: 0.4rem 0.6rem;
+.planner-badge {
+    padding: 0.45rem 0.7rem;
     color: var(--color-wood-duck-green);
     background: #e4f2e7;
     font-size: 0.7rem;
@@ -136,147 +104,152 @@
     text-transform: uppercase;
 }
 
-.map-frame {
-    height: 28rem;
-    margin-top: 1.5rem;
-    overflow: hidden;
-    background: var(--color-blue-jay-sky-blue);
-    border: 3px solid var(--color-blue-jay-midnight-black);
+.planner-form {
+    display: grid;
+    gap: 1.5rem;
+    margin-top: 2rem;
 }
 
-.map-frame iframe {
+.planner-form label,
+.planner-form legend {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--color-cardinal-charcoal);
+    font-size: 0.85rem;
+    font-weight: 800;
+}
+
+.planner-form input,
+.planner-form textarea,
+.planner-form select {
+    box-sizing: border-box;
     width: 100%;
-    height: 100%;
+    padding: 0.85rem 1rem;
+    color: var(--color-blue-jay-midnight-black);
+    background: var(--color-blue-jay-soft-white);
+    border: 2px solid #c8c8c8;
+    border-radius: 0.35rem;
+    font: inherit;
+}
+
+.planner-form textarea {
+    resize: vertical;
+}
+
+.planner-form input:focus,
+.planner-form textarea:focus,
+.planner-form select:focus {
+    outline: 3px solid var(--color-goldfinch-gold);
+    outline-offset: 2px;
+}
+
+.planner-form fieldset {
+    min-width: 0;
+    padding: 0;
     border: 0;
 }
 
-.map-footer {
+.planner-form legend {
+    padding: 0;
+}
+
+.planner-fields {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.planner-field-wide {
+    grid-column: 1 / -1;
+}
+
+.budget-label {
     display: flex;
+    align-items: baseline;
     justify-content: space-between;
     gap: 1rem;
-    margin-top: 1rem;
+}
+
+.budget-label label {
+    margin-bottom: 0;
+}
+
+.budget-label output {
+    font-size: 1.1rem;
+    font-weight: 800;
+}
+
+.budget-field input[type='range'] {
+    padding: 0;
+    accent-color: var(--color-blue-jay-royal-blue);
+    border: 0;
+}
+
+.planner-submit {
+    width: 100%;
+    padding: 0.9rem 1.25rem;
+    color: var(--color-goldfinch-white);
+    background: var(--color-blue-jay-midnight-black);
+    border: 0;
+    border-radius: 2rem;
+    font: inherit;
+    font-weight: 800;
+}
+
+.planner-submit:hover,
+.planner-submit:focus-visible {
+    background: var(--color-blue-jay-royal-blue);
+    cursor: pointer;
+}
+
+.planner-submit span {
+    margin-left: 0.5rem;
+    font-size: 1.2rem;
+}
+
+.planner-note {
+    margin-top: 1.25rem;
     color: var(--color-cardinal-charcoal);
     font-size: 0.8rem;
 }
 
-.map-footer a {
-    color: var(--color-blue-jay-royal-blue);
-    font-weight: 800;
-    text-decoration: none;
-}
-
-.chat-card {
-    display: flex;
-    flex-direction: column;
-    background: var(--color-blue-jay-royal-blue);
-    color: var(--color-goldfinch-white);
-    box-shadow: 7px 7px 0 var(--color-cardinal-red);
-}
-
-.chat-card .home-eyebrow {
-    color: var(--color-goldfinch-gold);
-}
-
-.chat-card .card-heading h2 {
-    color: var(--color-goldfinch-white);
-}
-
-.chat-spark {
-    color: var(--color-goldfinch-gold);
-    font-size: 1.75rem;
-}
-
-.chat-empty-state {
-    flex: 1;
-    padding: 5rem 1.5rem 3rem;
-    text-align: center;
-}
-
-.chat-icon {
-    display: grid;
-    width: 3.5rem;
-    height: 3.5rem;
-    margin: 0 auto 1.5rem;
-    place-items: center;
-    color: var(--color-blue-jay-royal-blue);
-    background: var(--color-goldfinch-gold);
-    border-radius: 50%;
-    font-size: 1.5rem;
-}
-
-.chat-placeholder {
-    font-size: 1.2rem;
-    font-weight: 800;
-}
-
-.chat-helper {
-    max-width: 18rem;
-    margin: 0.75rem auto 0;
-    color: var(--color-blue-jay-soft-white);
-    font-size: 0.9rem;
-}
-
-.chat-form {
-    display: flex;
-    gap: 0.5rem;
-}
-
-.chat-form input {
-    min-width: 0;
-    flex: 1;
-    padding: 0.9rem;
-    color: var(--color-cardinal-charcoal);
-    background: var(--color-goldfinch-white);
-    border: 0;
-    font: inherit;
-}
-
-.chat-form button {
-    width: 3rem;
-    color: var(--color-blue-jay-midnight-black);
-    background: var(--color-goldfinch-gold);
-    border: 0;
-    font-size: 1.4rem;
-}
-
-.chat-form input:disabled,
-.chat-form button:disabled {
-    cursor: not-allowed;
-    opacity: 0.7;
-}
-
-.chat-coming-soon {
-    margin-top: 0.75rem;
-    color: var(--color-blue-jay-soft-white);
-    font-size: 0.7rem;
-    text-align: right;
-    text-transform: uppercase;
-}
-
-.sr-only {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-    border: 0;
-}
-
 .home-page a:focus-visible,
-.home-page button:focus-visible,
-.home-page input:focus-visible {
+.home-page button:focus-visible {
     outline: 3px solid var(--color-goldfinch-gold);
     outline-offset: 3px;
 }
 
-@media (max-width: 56rem) {
-    .home-dashboard-grid {
+@media (max-width: 42rem) {
+    .home-header {
+        align-items: start;
+        gap: 1rem;
+    }
+
+    .home-header nav {
+        flex-wrap: wrap;
+        justify-content: end;
+        gap: 0.75rem 1rem;
+    }
+
+    .home-content {
+        width: min(100% - 2rem, 58rem);
+        padding-top: 1.5rem;
+    }
+
+    .planner-heading {
+        display: block;
+    }
+
+    .planner-badge {
+        display: inline-block;
+        margin-top: 1rem;
+    }
+
+    .planner-fields {
         grid-template-columns: 1fr;
     }
 
-    .chat-empty-state {
-        padding: 3rem 1.5rem;
+    .planner-field-wide {
+        grid-column: auto;
     }
 }

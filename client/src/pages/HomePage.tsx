@@ -1,10 +1,12 @@
 import '../styles/HomePage.css'
 import { useAuth0 } from '@auth0/auth0-react'
-import { Link } from 'react-router'
-
+import { useState, type FormEvent } from 'react'
+import { Link, useNavigate } from 'react-router'
 
 export default function HomePage() {
     const { logout } = useAuth0();
+    const navigate = useNavigate();
+    const [budget, setBudget] = useState(40);
 
     const handleLogout = () => {
         void logout({
@@ -14,100 +16,129 @@ export default function HomePage() {
         });
     };
 
+    const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        navigate('/dashboard');
+    };
+
     return (
         <>
-            <title>Home | HackTrent</title>
+            <title>Plan a trip | HackTrent</title>
 
             <div className="home-page">
                 <header className="home-header">
                     <Link className="home-brand" to="/home" aria-label="HackTrent home">
                         HackTrent
                     </Link>
-                    <nav aria-label="Dashboard navigation">
-                        <Link to="/home" aria-current="page">Home</Link>
+                    <nav aria-label="Main navigation">
+                        <Link to="/home" aria-current="page">Plan a trip</Link>
                         <Link to="/dashboard">Dashboard</Link>
                         <button type="button" onClick={handleLogout}>Log out</button>
                     </nav>
                 </header>
 
                 <main className="home-content">
-                    <section className="home-intro" aria-labelledby="home-heading">
-                        <div>
-                            <p className="home-eyebrow">Your community view</p>
-                            <h1 id="home-heading">Good morning, explorer.</h1>
-                            <p>
-                                Ask questions, discover what is happening nearby, and
-                                find your next place to explore.
-                            </p>
-                        </div>
-                        <div className="home-date" aria-label="Current location">
-                            <span className="home-date-marker" aria-hidden="true">●</span>
-                            <span>Peterborough, Ontario</span>
-                        </div>
-                    </section>
-
-                    <section className="home-dashboard-grid" aria-label="Home dashboard">
-                        <article className="home-card map-card">
-                            <div className="card-heading">
-                                <div>
-                                    <p className="home-eyebrow">Explore the area</p>
-                                    <h2>Peterborough map</h2>
-                                </div>
-                                <span className="card-status">Live view</span>
+                    <section className="planner-card" aria-labelledby="planner-heading">
+                        <div className="planner-heading">
+                            <div>
+                                <p className="home-eyebrow">SmartMove</p>
+                                <h1 id="planner-heading">Plan your next outing</h1>
+                                <p className="planner-intro">
+                                    Tell us what you have in mind and we&apos;ll help you find
+                                    something worth exploring.
+                                </p>
                             </div>
-                            <div className="map-frame">
-                                <iframe
-                                    title="Map of Peterborough, Ontario"
-                                    src="https://www.openstreetmap.org/export/embed.html?bbox=-78.40%2C44.27%2C-78.25%2C44.35&layer=mapnik&marker=44.3091%2C-78.3197"
-                                    loading="lazy"
+                            <span className="planner-badge">Demo</span>
+                        </div>
+
+                        <form className="planner-form" onSubmit={handleSubmit}>
+                            <div className="prompt-field">
+                                <label htmlFor="trip-prompt">What would you like to do?</label>
+                                <textarea
+                                    id="trip-prompt"
+                                    name="tripPrompt"
+                                    placeholder="I'd like to take my daughter somewhere fun this Saturday."
+                                    rows={3}
                                 />
                             </div>
-                            <div className="map-footer">
-                                <span>Centered on Peterborough</span>
-                                <a
-                                    href="https://www.openstreetmap.org/?mlat=44.3091&mlon=-78.3197#map=13/44.3091/-78.3197"
-                                    target="_blank"
-                                    rel="noreferrer"
-                                >
-                                    Open larger map <span aria-hidden="true">↗</span>
-                                </a>
-                            </div>
-                        </article>
 
-                        <article className="home-card chat-card">
-                            <div className="card-heading">
-                                <div>
-                                    <p className="home-eyebrow">Ask HackTrent</p>
-                                    <h2>How can we help?</h2>
+                            <fieldset>
+                                <legend>Trip preferences</legend>
+                                <div className="planner-fields">
+                                    <div className="planner-field planner-field-wide">
+                                        <label htmlFor="trip-location">Trip location</label>
+                                        <input
+                                            id="trip-location"
+                                            name="tripLocation"
+                                            type="text"
+                                            placeholder="Kingston, Ontario"
+                                            required
+                                        />
+                                    </div>
+
+                                    <div className="planner-field">
+                                        <label htmlFor="trip-date">Date</label>
+                                        <input id="trip-date" name="date" type="date" required />
+                                    </div>
+
+                                    <div className="planner-field">
+                                        <label htmlFor="departure-time">Departure time</label>
+                                        <input
+                                            id="departure-time"
+                                            name="departureTime"
+                                            type="time"
+                                            required
+                                        />
+                                    </div>
+
+                                    <div className="planner-field">
+                                        <label htmlFor="return-time">Home by</label>
+                                        <input
+                                            id="return-time"
+                                            name="returnTime"
+                                            type="time"
+                                            required
+                                        />
+                                    </div>
+
+                                    <div className="planner-field planner-field-wide">
+                                        <label htmlFor="interests">Interests</label>
+                                        <select id="interests" name="interests" defaultValue="family">
+                                            <option value="family">Anything family-friendly</option>
+                                            <option value="arts">Arts and culture</option>
+                                            <option value="outdoors">Outdoors and nature</option>
+                                            <option value="food">Food and local experiences</option>
+                                            <option value="sports">Sports and recreation</option>
+                                        </select>
+                                    </div>
                                 </div>
-                                <span className="chat-spark" aria-hidden="true">✦</span>
-                            </div>
-                            <div className="chat-empty-state">
-                                <div className="chat-icon" aria-hidden="true">✦</div>
-                                <p className="chat-placeholder">
-                                    Your local guide is almost ready.
-                                </p>
-                                <p className="chat-helper">
-                                    Gemini-powered answers and recommendations will
-                                    appear here soon.
-                                </p>
-                            </div>
-                            <form className="chat-form" onSubmit={(event) => event.preventDefault()}>
-                                <label className="sr-only" htmlFor="chat-question">
-                                    Ask a question
-                                </label>
+                            </fieldset>
+
+                            <div className="budget-field">
+                                <div className="budget-label">
+                                    <label htmlFor="budget">Maximum budget (CAD, including transportation)</label>
+                                    <output htmlFor="budget">${budget}</output>
+                                </div>
                                 <input
-                                    id="chat-question"
-                                    type="text"
-                                    placeholder="Ask about Peterborough..."
-                                    disabled
+                                    id="budget"
+                                    name="budget"
+                                    type="range"
+                                    min="0"
+                                    max="200"
+                                    step="5"
+                                    value={budget}
+                                    onChange={(event) => setBudget(Number(event.target.value))}
                                 />
-                                <button type="submit" disabled aria-label="Send question">
-                                    <span aria-hidden="true">→</span>
-                                </button>
-                            </form>
-                            <p className="chat-coming-soon">Chat functionality coming soon</p>
-                        </article>
+                            </div>
+
+                            <button className="planner-submit" type="submit">
+                                Find outings <span aria-hidden="true">→</span>
+                            </button>
+                        </form>
+
+                        <p className="planner-note">
+                            Your preferences will be used to build a personalized itinerary.
+                        </p>
                     </section>
                 </main>
             </div>
