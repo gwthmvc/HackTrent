@@ -147,3 +147,90 @@ vite.config.ts.timestamp-*
 
 # Turbo Repo
 .turbo
+
+
+# ==========================================
+# Operating System Files
+# ==========================================
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+.DocumentRevisions-V100
+.fseventsd
+$RECYCLE.BIN/
+
+# Windows
+Thumbs.db
+ehthumbs.db
+desktop.ini
+*.lnk
+
+# Linux
+.directory
+*~
+
+
+# ==========================================
+# Editors and IDEs
+# ==========================================
+
+# Visual Studio Code
+.vscode/*
+!.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/tasks.json
+!.vscode/settings.json
+
+# JetBrains (IntelliJ, WebStorm, PyCharm, etc.)
+.idea/
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim / Emacs
+.*.swp
+.*.swo
+\#*\#
+.\#*
+
+
+# ==========================================
+# Common Language & Build Artifacts
+# ==========================================
+
+# Node / JavaScript
+node_modules/
+dist/
+build/
+.npm
+.eslintcache
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+.pytest_cache/
+
+# Logs and Caches
+*.log
+logs/
+.cache/
+
+
+# ==========================================
+# Security & Environments
+# ==========================================
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
