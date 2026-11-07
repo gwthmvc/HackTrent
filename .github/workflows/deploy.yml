@@ -1,6 +1,6 @@
 name: Deploy React App to Vultr
 
-on:
+"on":
   push:
     branches: [ "main" ]
 
@@ -19,9 +19,9 @@ jobs:
 
       - name: Install Dependencies & Build
         run: |
-          cd client
           npm ci
           npm run build
+        working-directory: ./client
 
       - name: Deploy to Vultr via SCP
         uses: appleboy/scp-action@v0.1.7
@@ -29,6 +29,6 @@ jobs:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: "client/dist/*" # Points to the build output inside your client folder
+          source: "client/dist/*"
           target: "/var/www/html/"
-          strip_components: 2 # Flattens both 'client' and 'dist' folders so index.html lands directly in /var/www/html/
+          strip_components: 2
