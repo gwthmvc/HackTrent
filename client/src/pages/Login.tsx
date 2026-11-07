@@ -7,14 +7,43 @@ type LoginResponse = {
     api_key?: string;
     apiKey?: string;
     key?: string;
+    token?: string;
+    access_token?: string;
     user?: Record<string, unknown>;
-    data?: {
-        api_key?: string;
-        apiKey?: string;
-        key?: string;
-        user?: Record<string, unknown>;
-    };
+    data?: LoginPayload;
+    result?: LoginPayload;
+    account?: Record<string, unknown>;
 };
+
+type LoginPayload = {
+    api_key?: string;
+    apiKey?: string;
+    key?: string;
+    token?: string;
+    access_token?: string;
+    user?: Record<string, unknown>;
+    account?: Record<string, unknown>;
+};
+
+function getLoginDetails(response: LoginResponse) {
+    const payload = response.data ?? response.result;
+    const apiKey = response.api_key
+        ?? response.apiKey
+        ?? response.key
+        ?? response.token
+        ?? response.access_token
+        ?? payload?.api_key
+        ?? payload?.apiKey
+        ?? payload?.key
+        ?? payload?.token
+        ?? payload?.access_token;
+    const user = response.user
+        ?? response.account
+        ?? payload?.user
+        ?? payload?.account;
+
+    return { apiKey, user };
+}
 
 export default function Login(){
     const [email, setEmail] = useState('');
@@ -46,13 +75,7 @@ export default function Login(){
                 email: email.trim(),
                 password,
             });
-            const apiKey = response.api_key
-                ?? response.apiKey
-                ?? response.key
-                ?? response.data?.api_key
-                ?? response.data?.apiKey
-                ?? response.data?.key;
-            const user = response.user ?? response.data?.user;
+            const { apiKey, user } = getLoginDetails(response);
 
             if (!apiKey || !user) {
                 throw new Error('Login response did not include account details.');
