@@ -2,7 +2,8 @@ name: Deploy React App to Vultr
 
 on:
   push:
-    branches: [ "main" ] # Triggers automatically on push to main branch
+    branches: ["main"]
+  workflow_dispatch:
 
 jobs:
   build-and-deploy:
