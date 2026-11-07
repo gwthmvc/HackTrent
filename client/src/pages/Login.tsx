@@ -8,6 +8,9 @@ export default function Login() {
     const { error, isAuthenticated, isLoading, loginWithRedirect } = useAuth0();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [localError, setLocalError] = useState<string | null>(null);
+    const [successMessage] = useState<string | null>(
+        () => sessionStorage.getItem('hacktrent_signup_message'),
+    );
     const errorRef = useRef<HTMLParagraphElement>(null);
     const navigate = useNavigate();
 
@@ -16,6 +19,12 @@ export default function Login() {
             navigate('/dashboard', { replace: true });
         }
     }, [isAuthenticated, navigate]);
+
+    useEffect(() => {
+        if (successMessage) {
+            sessionStorage.removeItem('hacktrent_signup_message');
+        }
+    }, [successMessage]);
 
     useEffect(() => {
         if (error || localError) {
@@ -32,7 +41,11 @@ export default function Login() {
         setLocalError(null);
         setIsSubmitting(true);
         try {
-            await loginWithRedirect();
+            await loginWithRedirect({
+                authorizationParams: {
+                    prompt: 'login',
+                },
+            });
         } catch (loginError) {
             setLocalError(loginError instanceof Error ? loginError.message : 'Login failed.');
             setIsSubmitting(false);
@@ -52,6 +65,10 @@ export default function Login() {
                             {displayError}
                         </p>
                     </div>
+                )}
+
+                {successMessage && (
+                    <p className="success" role="status">{successMessage}</p>
                 )}
 
                 <div className="login-container">
