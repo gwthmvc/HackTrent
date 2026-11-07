@@ -12,3 +12,107 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+:root {
+  /* ==========================================
+     ONTARIO BIRDS DESIGN SYSTEM TOKENS
+     ========================================== */
+
+  /* 01. Blue Jay */
+  --color-blue-jay-royal-blue:       #1E4D8C;
+  --color-blue-jay-sky-blue:         #5E97D1;
+  --color-blue-jay-soft-white:       #F2F5FA;
+  --color-blue-jay-midnight-black:   #11161B;
+
+  /* 02. Northern Cardinal */
+  --color-cardinal-red:              #C8102E;
+  --color-cardinal-crimson:          #A6192E;
+  --color-cardinal-charcoal:         #212121;
+  --color-cardinal-beak-orange:      #E1523D;
+
+  /* 03. American Goldfinch */
+  --color-goldfinch-gold:            #FFCD00;
+  --color-goldfinch-olive-gold:      #A39343;
+  --color-goldfinch-jet-black:       #1A1A1A;
+  --color-goldfinch-white:           #FFFFFF;
+
+  /* 04. Common Loon */
+  --color-loon-obsidian:             #0B0F12;
+  --color-loon-green-sheen:          #0D3326;
+  --color-loon-white:                #F9FBFB;
+  --color-loon-ruby-eye:             #8B0000;
+
+  /* 05. Eastern Bluebird */
+  --color-bluebird-cerulean:         #2B6CC4;
+  --color-bluebird-rusty-rufous:     #B35433;
+  --color-bluebird-warm-cream:       #F5EFEB;
+
+  /* 06. Baltimore Oriole */
+  --color-oriole-orange:             #FF6F00;
+  --color-oriole-pitch-black:        #0D0D0D;
+  --color-oriole-flame-yellow:       #FFB300;
+
+  /* 07. Wood Duck */
+  --color-wood-duck-green:           #064E3B;
+  --color-wood-duck-burgundy:        #651A14;
+  --color-wood-duck-buff-yellow:     #E1C16E;
+  --color-wood-duck-white:           #FAFAFA;
+
+  /* 08. Rose-breasted Grosbeak */
+  --color-grosbeak-rose:             #E61C40;
+  --color-grosbeak-obsidian:         #141414;
+  --color-grosbeak-snow-white:       #FDFDFD;
+
+  /* 09. Belted Kingfisher */
+  --color-kingfisher-slate-blue:     #4A6B82;
+  --color-kingfisher-rust-orange:    #B85D38;
+  --color-kingfisher-gray-white:     #ECEFF1;
+
+  /* 10. Scarlet Tanager */
+  --color-tanager-scarlet-red:       #FF2400;
+  --color-tanager-coal-black:        #0A0A0B;
+  --color-tanager-olive-green:       #607D3B;
+
+  /* 11. Ruby-throated Hummingbird */
+  --color-hummingbird-ruby:          #C41E3A;
+  --color-hummingbird-emerald:       #4F7942;
+  --color-hummingbird-dusty-white:   #EAEAEA;
+
+  /* 12. Snowy Owl */
+  --color-snowy-owl-arctic-white:    #FAF9F6;
+  --color-snowy-owl-dark-umber:      #2F2E2C;
+  --color-snowy-owl-yellow:          #E6B800;
+
+  /* 13. Blackburnian Warbler */
+  --color-warbler-flame-orange:      #FF5500;
+  --color-warbler-sulphur-yellow:    #FFD000;
+  --color-warbler-charcoal-black:    #1C1C1C;
+  --color-warbler-aspen-white:       #F7F9FA;
+
+  /* 14. Mallard */
+  --color-mallard-speculum-blue:     #1134A6;
+  --color-mallard-green:             #0B5345;
+  --color-mallard-chestnut-brown:    #5D4037;
+  --color-mallard-silver-gray:       #BDC3C7;
+
+  /* 15. Indigo Bunting */
+  --color-bunting-deep-indigo:       #0F2042;
+  --color-bunting-cerulean-blue:     #007AA5;
+  --color-bunting-electric-cyan:     #00A3E0;
+
+  /* 16. Pileated Woodpecker */
+  --color-woodpecker-crimson:        #D32F2F;
+  --color-woodpecker-soot-black:     #1E1E24;
+  --color-woodpecker-ivory-white:    #F5F6F8;
+
+  /* 17. Red-winged Blackbird */
+  --color-blackbird-glossy-black:    #0D0D11;
+  --color-blackbird-epaulet-red:     #E53935;
+  --color-blackbird-buff-yellow:     #F4D03F;
+
+  /* 18. American Kestrel */
+  --color-kestrel-slate-blue:        #5B7085;
+  --color-kestrel-terracotta:        #BA5A31;
+  --color-kestrel-warm-cream:        #FFF1E6;
+  --color-kestrel-midnight-black:    #1A1A1A;
+}
+
