@@ -4,17 +4,9 @@ import './index.css'
 import { Auth0Provider } from '@auth0/auth0-react'
 import { createBrowserRouter, RouterProvider } from 'react-router';
 import routes from './routes';
+import { auth0ClientId, auth0Domain } from './auth/config';
 
 const router = createBrowserRouter(routes);
-const auth0Domain = import.meta.env.VITE_AUTH0_DOMAIN;
-const auth0ClientId = import.meta.env.VITE_AUTH0_CLIENT_ID;
-
-if (!auth0Domain || !auth0ClientId) {
-  throw new Error(
-    'Missing Auth0 configuration. Set VITE_AUTH0_DOMAIN and VITE_AUTH0_CLIENT_ID.',
-  );
-}
-
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

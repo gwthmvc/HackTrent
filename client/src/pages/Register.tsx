@@ -2,6 +2,7 @@ import '../styles/Register.css'
 import { useAuth0 } from '@auth0/auth0-react'
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router'
+import { isAuth0Configured } from '../auth/config'
 
 export default function Register() {
     const { error, isAuthenticated, isLoading, loginWithRedirect } = useAuth0();
@@ -23,6 +24,11 @@ export default function Register() {
     }, [error, localError]);
 
     const handleRegister = async () => {
+        if (!isAuth0Configured) {
+            setLocalError('Auth0 is not configured for this deployment.');
+            return;
+        }
+
         setLocalError(null);
         setIsSubmitting(true);
         try {
