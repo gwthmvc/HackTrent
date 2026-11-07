@@ -1,14 +1,20 @@
 import '../styles/Register.css'
 import { useEffect, useRef, useState, type SubmitEvent } from 'react'
+import { useNavigate } from 'react-router'
+import { post } from '../services/api'
 
 
 export default function Register(){
-    const [username, setUsername] = useState('');
+    const [firstName, setFirstName] = useState('');
+    const [lastName, setLastName] = useState('');
+    const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
-
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
+    const [successMsg, setSuccessMsg] = useState<string | null>(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const errorRef = useRef<HTMLParagraphElement>(null);
+    const navigate = useNavigate();
 
     useEffect(() => {
         if (errorMsg) {
@@ -19,13 +25,34 @@ export default function Register(){
     const handleRegister = async (e: SubmitEvent<HTMLFormElement>) => {
         e.preventDefault();
 
-        // Check if passwords match
-        if (password !== confirmPassword) {
-            setErrorMsg("Passwords do not match");
+        if (!firstName.trim() || !lastName.trim() || !email.trim() || !password) {
+            setErrorMsg('Please complete all fields.');
             return;
         }
 
-        // TODO: Implement registration logic here (e.g., API call to register the user)
+        if (password !== confirmPassword) {
+            setErrorMsg('Passwords do not match.');
+            return;
+        }
+
+        setErrorMsg(null);
+        setSuccessMsg(null);
+        setIsSubmitting(true);
+
+        try {
+            await post('/register', {
+                first_name: firstName.trim(),
+                last_name: lastName.trim(),
+                email: email.trim(),
+                password,
+            });
+            setSuccessMsg('Registration successful. Redirecting to login...');
+            window.setTimeout(() => navigate('/login'), 1000);
+        } catch (error) {
+            setErrorMsg(error instanceof Error ? error.message : 'Registration failed.');
+        } finally {
+            setIsSubmitting(false);
+        }
     }
 
 
@@ -36,6 +63,8 @@ export default function Register(){
             <title>Register | HackTrent</title>
             <main>
                 <h1>Register</h1>
+
+                {successMsg && <p className="success" role="status">{successMsg}</p>}
 
                 {errorMsg && (
                     <div className="error-container" role="alert">
@@ -52,16 +81,44 @@ export default function Register(){
 
                 <div className="register-container">
                     <form onSubmit={handleRegister} className="form-component">
-                        <label htmlFor="username">Username</label>
+                        <label htmlFor="first-name">First name</label>
                         <input
                             type="text"
-                            id="username"
-                            name="username"
-                            autoComplete="username"
+                            id="first-name"
+                            name="first_name"
+                            autoComplete="given-name"
                             required
-                            value={username}
+                            value={firstName}
                             onChange={(e) => {
-                                setUsername(e.target.value);
+                                setFirstName(e.target.value);
+                                setErrorMsg(null);
+                            }}
+                        />
+
+                        <label htmlFor="last-name">Last name</label>
+                        <input
+                            type="text"
+                            id="last-name"
+                            name="last_name"
+                            autoComplete="family-name"
+                            required
+                            value={lastName}
+                            onChange={(e) => {
+                                setLastName(e.target.value);
+                                setErrorMsg(null);
+                            }}
+                        />
+
+                        <label htmlFor="email">Email</label>
+                        <input
+                            type="email"
+                            id="email"
+                            name="email"
+                            autoComplete="email"
+                            required
+                            value={email}
+                            onChange={(e) => {
+                                setEmail(e.target.value);
                                 setErrorMsg(null);
                             }}
                         />
@@ -87,8 +144,8 @@ export default function Register(){
                             name="confirmPassword"
                             autoComplete="new-password"
                             required
-                            aria-invalid={errorMsg === "Passwords do not match"}
-                            aria-describedby={errorMsg ? "register-error" : undefined}
+                            aria-invalid={Boolean(errorMsg)}
+                            aria-describedby={errorMsg ? 'register-error' : undefined}
                             value={confirmPassword}
                             onChange={(e) => {
                                 setConfirmPassword(e.target.value);
@@ -96,7 +153,9 @@ export default function Register(){
                             }}
                         />
 
-                        <button type="submit">Register</button>
+                        <button type="submit" disabled={isSubmitting}>
+                            {isSubmitting ? 'Registering...' : 'Register'}
+                        </button>
 
                     </form>
                 </div>
