@@ -98,7 +98,7 @@ export default function Dashboard() {
 
     const handleLogout = () => {
         void logout({
-            logoutParams: { returnTo: `${window.location.origin}/login` },
+            logoutParams: { returnTo: window.location.origin },
         });
     };
 
