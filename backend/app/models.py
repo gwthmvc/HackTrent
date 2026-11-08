@@ -268,6 +268,19 @@ class OutingDataSource(ApiModel):
     retrieved_at: datetime | None = None
 
 
+class OutingPlaces(ApiModel):
+    area_id: str
+    area_name: str
+    anchor: PlaceSearchAnchor
+    radius_meters: int
+    retrieved_at: datetime
+    data_timestamp: datetime | None
+    cached: bool
+    total_available: int
+    places: list[DiscoveredPlace]
+    source: PlacesSource
+
+
 class OutingRecommendation(ApiModel):
     id: str
     name: str
@@ -364,3 +377,4 @@ class OutingPlanResponse(ApiModel):
     police_incidents: OutingPoliceIncidents
     locations: list[OutingLocation]
     source_status: OutingSourceStatuses
+    places: OutingPlaces | None = None

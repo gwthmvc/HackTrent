@@ -196,12 +196,13 @@ def ok(payload: dict) -> httpx.Response:
     return httpx.Response(200, json=payload)
 
 
-def place_payload() -> dict:
+def place_payload(*elements: dict) -> dict:
+    places = list(elements) or [{
+        "type": "node", "id": 1, "lat": 43.9005, "lon": -78.8995,
+        "tags": {"name": "Local Cafe", "amenity": "cafe"},
+    }]
     return {
-        "elements": [{
-            "type": "node", "id": 1, "lat": 43.9005, "lon": -78.8995,
-            "tags": {"name": "Local Cafe", "amenity": "cafe"},
-        }],
+        "elements": places,
         "osm3s": {"timestamp_osm_base": "2026-11-11T14:59:00Z"},
     }
 
@@ -229,6 +230,63 @@ def test_all_sources_succeed():
     assert {item["id"] for item in body["recommendations"]} == {"event-1", "osm-node-1"}
     assert body["itinerary"][0]["id"] == "event-1"
     assert body["transit"]["items"][0]["id"] == "bus-1"
+
+
+def test_outing_places_match_place_search():
+    place_elements = [
+        {
+            "type": "node", "id": 11, "lat": 43.9005, "lon": -78.8995,
+            "tags": {"name": "Cafe One", "amenity": "cafe"},
+        },
+        {
+            "type": "node", "id": 12, "lat": 43.901, "lon": -78.898,
+            "tags": {"name": "Cafe Two", "amenity": "restaurant"},
+        },
+    ]
+    client, _ = make_client(
+        Upstream(ok(tm_payload())),
+        Upstream(ok(place_payload(*place_elements))),
+    )
+    with client:
+        body = client.post("/api/outings/generate", json=BODY).json()
+
+    places = body["places"]
+    assert places["areaId"] == "durham"
+    assert places["anchor"] == {
+        "name": "Oshawa search area",
+        "latitude": 43.9,
+        "longitude": -78.9,
+        "kind": "area_center",
+    }
+    assert places["radiusMeters"] == 3_500
+    assert places["totalAvailable"] == 2
+    assert [place["id"] for place in places["places"]] == ["osm-node-11", "osm-node-12"]
+    assert [place["distanceMeters"] for place in places["places"]] == [69, 195]
+
+
+def test_outing_places_null_when_unavailable():
+    client, _ = make_client(
+        Upstream(ok(tm_payload())),
+        Upstream(httpx.Response(504)),
+    )
+    with client:
+        body = client.post("/api/outings/generate", json=BODY).json()
+
+    assert body["places"] is None
+    assert body["sourceStatus"]["places"]["status"] == "unavailable"
+
+
+def test_outing_places_empty_when_none_found():
+    client, _ = make_client(
+        Upstream(ok(tm_payload())),
+        Upstream(ok({"elements": []})),
+    )
+    with client:
+        body = client.post("/api/outings/generate", json=BODY).json()
+
+    assert body["places"]["places"] == []
+    assert body["places"]["totalAvailable"] == 0
+    assert body["sourceStatus"]["places"]["status"] == "available"
 
 
 def test_missing_classification_is_null_and_price_uses_price_range():

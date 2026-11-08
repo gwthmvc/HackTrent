@@ -12,6 +12,7 @@ from .models import (
     OutingItineraryItem,
     OutingJourneys,
     OutingLocation,
+    OutingPlaces,
     OutingPlanRequest,
     OutingPlanResponse,
     OutingPoliceIncidents,
@@ -351,6 +352,21 @@ class OutingOrchestrator:
             source_status=OutingSourceStatuses(
                 events=event_status, places=place_status, transit=transit_status,
                 journeys=journey_status,
+            ),
+            places=(
+                OutingPlaces(
+                    area_id=places_response.area_id,
+                    area_name=places_response.area_name,
+                    anchor=places_response.anchor,
+                    radius_meters=places_response.radius_meters,
+                    retrieved_at=places_response.retrieved_at,
+                    data_timestamp=places_response.data_timestamp,
+                    cached=places_response.cached,
+                    total_available=places_response.total_available,
+                    places=places_response.places,
+                    source=places_response.source,
+                )
+                if places_response else None
             ),
         )
 
