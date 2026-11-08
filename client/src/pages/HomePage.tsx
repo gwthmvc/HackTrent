@@ -118,6 +118,9 @@ export default function HomePage() {
                     const searchRequest = {
                         startingLocation: effectiveStartingLocation,
                         outingRequest: request,
+                        ...(departureDate && departureTime
+                            ? { date: departureDate, time: departureTime }
+                            : {}),
                     };
                     const [transitResult, eventsResult] = await Promise.allSettled([
                         fetchTransitContext(searchRequest, accessToken),
