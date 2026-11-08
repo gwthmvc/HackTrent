@@ -1,5 +1,4 @@
 import { Outlet, type RouteObject } from 'react-router';
-import Auth0ProviderWithNavigate from './components/Auth0ProviderWithNavigate';
 import Dashboard from './pages/Dashboard';
 import HomePage from './pages/HomePage';
 import Login from './pages/Login';

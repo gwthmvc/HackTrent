@@ -1,7 +1,7 @@
 import '../styles/Register.css'
 import { useAuth0 } from '@auth0/auth0-react'
 import { useEffect, useRef, useState } from 'react'
-import { useNavigate } from 'react-router'
+import { Link, useNavigate } from 'react-router'
 import { isAuth0Configured } from '../auth/config'
 
 const SIGNUP_COMPLETED_KEY = 'hacktrent_signup_completed';
@@ -16,31 +16,7 @@ export default function Register() {
 
     useEffect(() => {
         if (isAuthenticated) {
-            const signupCompleted = sessionStorage.getItem(SIGNUP_COMPLETED_KEY) === 'true';
-
-            if (signupCompleted && !handledSignupRef.current) {
-                handledSignupRef.current = true;
-                sessionStorage.removeItem(SIGNUP_COMPLETED_KEY);
-                sessionStorage.setItem(
-                    'hacktrent_signup_message',
-                    'Your account was created. Please log in with your new details.',
-                );
-                sessionStorage.setItem('hacktrent_logout_redirect', 'login');
-                void logout({
-                    logoutParams: {
-                        returnTo: window.location.origin,
-                    },
-                }).catch((logoutError: unknown) => {
-                    setLocalError(
-                        logoutError instanceof Error
-                            ? logoutError.message
-                            : 'Unable to finish registration. Please try logging in again.',
-                    );
-                });
-                return;
-            }
-
-            navigate('/dashboard', { replace: true });
+            navigate('/home', { replace: true });
         }
     }, [isAuthenticated, logout, navigate]);
 
@@ -61,9 +37,7 @@ export default function Register() {
         sessionStorage.setItem(SIGNUP_COMPLETED_KEY, 'true');
         try {
             await loginWithRedirect({
-                appState: {
-                    returnTo: '/register',
-                },
+                appState: { returnTo: '/home' },
                 authorizationParams: {
                     screen_hint: 'signup',
                 },
@@ -82,29 +56,44 @@ export default function Register() {
 
     return (
         <>
-            <title>Register | HackTrent</title>
+            <title>Register | SmartMove Ontario</title>
             <main>
-                <h1>Register</h1>
+                <header className="landing-header">
+                    <Link className="landing-brand" to="/" aria-label="SmartMove Ontario home">
+                        <span className="landing-brand-mark" aria-hidden="true"><span /><span /></span>
+                        <span>SmartMove <small>Ontario</small></span>
+                    </Link>
+                </header>
 
-                {displayError && (
-                    <div className="error-container" role="alert" aria-atomic="true">
-                        <p ref={errorRef} className="error" tabIndex={-1}>
-                            {displayError}
-                        </p>
-                    </div>
-                )}
+                <div className="auth-content">
+                    <h1>Register</h1>
+                    <p className="auth-subtitle">You&apos;ll create your account on Auth0&apos;s secure page, then return here to plan your outing.</p>
 
-                <div className="register-container">
-                    <div className="form-component">
-                        <p>Create your HackTrent account securely with Auth0.</p>
-                        <button
-                            type="button"
-                            onClick={handleRegister}
-                            disabled={isLoading || isSubmitting}
-                        >
-                            {isSubmitting ? 'Redirecting...' : 'Sign up with Auth0'}
-                        </button>
+                    {displayError && (
+                        <div className="error-container" role="alert" aria-atomic="true">
+                            <p ref={errorRef} className="error" tabIndex={-1}>
+                                {displayError}
+                            </p>
+                        </div>
+                    )}
+
+                    <div className="register-container">
+                        <div className="form-component">
+                            <p>Create your SmartMove Ontario account securely with Auth0.</p>
+                            <button
+                                type="button"
+                                onClick={handleRegister}
+                                disabled={isLoading || isSubmitting}
+                            >
+                                {isSubmitting ? 'Redirecting...' : 'Sign up with Auth0'}
+                            </button>
+                        </div>
                     </div>
+
+                    <nav className="auth-links" aria-label="Registration navigation">
+                        <Link to="/">Back to home</Link>
+                        <Link to="/login">Already have an account? Log in</Link>
+                    </nav>
                 </div>
             </main>
         </>
