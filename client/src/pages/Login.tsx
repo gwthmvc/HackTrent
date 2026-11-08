@@ -32,11 +32,13 @@ export default function Login() {
 
         setLocalError(null);
         setIsSubmitting(true);
+        sessionStorage.setItem('smartmove_login_return_to_home', 'true');
         try {
             await loginWithRedirect({
                 appState: { returnTo: '/home' },
             });
         } catch (loginError) {
+            sessionStorage.removeItem('smartmove_login_return_to_home');
             setLocalError(loginError instanceof Error ? loginError.message : 'Login failed.');
             setIsSubmitting(false);
         }
