@@ -1,5 +1,6 @@
-import { Auth0Provider } from '@auth0/auth0-react'
+import { Auth0Provider, useAuth0 } from '@auth0/auth0-react'
 import type { PropsWithChildren } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router'
 import {
     auth0ApiScope,
@@ -9,7 +10,7 @@ import {
 } from '../auth/config'
 
 export default function Auth0ProviderWithNavigate({ children }: PropsWithChildren) {
-    const navigate = useNavigate();
+    const [redirectPending, setRedirectPending] = useState(false);
 
     return (
         <Auth0Provider
@@ -29,10 +30,40 @@ export default function Auth0ProviderWithNavigate({ children }: PropsWithChildre
                     : {}),
             }}
             onRedirectCallback={() => {
-                navigate('/home', { replace: true });
+                setRedirectPending(true);
             }}
         >
-            {children}
+            <AuthRedirectGate
+                redirectPending={redirectPending}
+                onRedirectComplete={() => setRedirectPending(false)}
+            >
+                {children}
+            </AuthRedirectGate>
         </Auth0Provider>
     );
+}
+
+function AuthRedirectGate({
+    children,
+    redirectPending,
+    onRedirectComplete,
+}: PropsWithChildren<{
+    redirectPending: boolean;
+    onRedirectComplete: () => void;
+}>) {
+    const { isAuthenticated, isLoading } = useAuth0();
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        if (redirectPending && !isLoading && isAuthenticated) {
+            navigate('/home', { replace: true });
+            onRedirectComplete();
+        }
+    }, [isAuthenticated, isLoading, navigate, onRedirectComplete, redirectPending]);
+
+    if (redirectPending) {
+        return <p role="status" aria-live="polite">Loading your home page...</p>;
+    }
+
+    return children;
 }
