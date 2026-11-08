@@ -4,6 +4,7 @@ import './index.css'
 import { createBrowserRouter, RouterProvider } from 'react-router';
 import routes from './routes';
 import { auth0ApiScope, auth0Audience, auth0ClientId, auth0Domain } from './auth/config';
+import { Auth0Provider } from '@auth0/auth0-react';
 
 const router = createBrowserRouter(routes);
 

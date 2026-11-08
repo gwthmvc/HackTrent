@@ -8,6 +8,8 @@ import ErrorPage from './pages/ErrorPage';
 import LandingPage from './pages/LandingPage';
 import ProtectedRoute from './components/ProtectedRoute';
 
+import Auth0ProviderWithNavigate  from './components/Auth0ProviderWithNavigate'; // or wherever your component is defined
+
 const routes: RouteObject[] = [{
     path: '/',
     element: <Auth0ProviderWithNavigate><Outlet /></Auth0ProviderWithNavigate>,
