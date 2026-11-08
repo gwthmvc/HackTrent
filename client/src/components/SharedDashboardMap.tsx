@@ -66,6 +66,12 @@ function compositeLocationId(layerId: DashboardMapLayerId, locationId: string): 
     return `${layerId}::${locationId}`;
 }
 
+function locationDedupeKey(location: VerifiedLocation): string {
+    const latitude = location.latitude.toFixed(5);
+    const longitude = location.longitude.toFixed(5);
+    return `${latitude}::${longitude}::${location.name.trim().toLocaleLowerCase()}`;
+}
+
 export function DashboardMapProvider({ children }: { children: ReactNode }) {
     const [layers, setLayers] = useState<Map<DashboardMapLayerId, DashboardMapLayer>>(
         () => new Map(),
@@ -176,10 +182,27 @@ function SharedDashboardMap({
         const markerLabels = new Map<string, string>();
         const markerVariants = new Map<string, MapMarkerVariant>();
         const owners = new Map<string, MapTarget>();
+        const seenLocationIds = new Set<string>();
+        const seenLocationKeys = new Set<string>();
+        let mergedLocationCount = 0;
+        // Events are processed first so duplicate locations keep their event marker and label.
+        const layersInMarkerOrder = [...visibleLayers].sort((left, right) => (
+            left.id === 'events' ? -1 : right.id === 'events' ? 1 : 0
+        ));
 
-        visibleLayers.forEach((layer) => {
+        layersInMarkerOrder.forEach((layer) => {
             layer.locations.forEach((location, index) => {
+                if (!Number.isFinite(location.latitude) || !Number.isFinite(location.longitude)) {
+                    return;
+                }
                 const compositeId = compositeLocationId(layer.id, location.id);
+                const locationKey = locationDedupeKey(location);
+                if (seenLocationIds.has(location.id) || seenLocationKeys.has(locationKey)) {
+                    mergedLocationCount += 1;
+                    return;
+                }
+                seenLocationIds.add(location.id);
+                seenLocationKeys.add(locationKey);
                 const number = layer.stopNumbers.get(location.id) ?? index + 1;
                 locations.push({ ...location, id: compositeId });
                 markerLabels.set(compositeId, `${LAYER_PREFIXES[layer.id]}${number}`);
@@ -189,7 +212,7 @@ function SharedDashboardMap({
             routes.push(...layer.routes);
         });
 
-        return { locations, routes, markerLabels, markerVariants, owners };
+        return { locations, routes, markerLabels, markerVariants, owners, mergedLocationCount };
     }, [visibleLayers]);
 
     const selectedLocationId = selected && layerVisibility[selected.layerId] !== false
