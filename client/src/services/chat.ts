@@ -1,5 +1,5 @@
 const CHAT_API_URL = import.meta.env.VITE_CHAT_API_URL ?? '/api/chat';
-const CHAT_TIMEOUT_MS = 20_000;
+const CHAT_TIMEOUT_MS = 60_000;
 
 export type ChatMessage = {
     role: 'user' | 'model';
@@ -44,7 +44,7 @@ export async function sendChatMessage(
         return responseBody.reply;
     } catch (error) {
         if (error instanceof DOMException && error.name === 'AbortError') {
-            throw new Error('The chat service took too long to respond.', {
+            throw new Error('The chat service did not respond within 60 seconds. Please try again.', {
                 cause: error,
             });
         }

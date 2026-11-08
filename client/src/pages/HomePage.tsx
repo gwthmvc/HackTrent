@@ -110,7 +110,16 @@ export default function HomePage() {
                                         </div>
                                     ))
                                 )}
-                                {loading && <p className="text-gray-400 italic" style={{ fontSize: '0.85rem', color: '#888' }}>Thinking and searching Tiger Data...</p>}
+                                {loading && (
+                                    <p
+                                        className="text-gray-400 italic"
+                                        role="status"
+                                        aria-live="polite"
+                                        style={{ fontSize: '0.85rem', color: '#888' }}
+                                    >
+                                        Searching your project data...
+                                    </p>
+                                )}
                             </div>
 
                             {/* Functional Input Form */}
