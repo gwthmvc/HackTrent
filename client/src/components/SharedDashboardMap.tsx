@@ -138,6 +138,7 @@ function SharedDashboardMap({
         () => registeredLayers.filter((layer) => layerVisibility[layer.id] !== false),
         [layerVisibility, registeredLayers],
     );
+    const allLayersHidden = registeredLayers.length > 0 && visibleLayers.length === 0;
     const nearbyTransitVehicles = useMemo(() => {
         if (!startingPoint
             || !Number.isFinite(startingPoint.latitude)
@@ -275,6 +276,13 @@ function SharedDashboardMap({
                     </button>
                 )}
             </div>
+            {allLayersHidden && (
+                <p className="shared-map-note" role="status">
+                    Event, place, and itinerary markers are hidden on the map.
+                    Turn a layer back on to show it.
+                    {showTransit && ' Historical sightings are still shown.'}
+                </p>
+            )}
             <VerifiedMap
                 startingPoint={startingPoint}
                 transitVehicles={showTransit ? nearbyTransitVehicles : []}
