@@ -50,6 +50,6 @@ export async function sendChatMessage(
         }
         throw error;
     } finally {
-        window.clearTimeout(timeoutId);
+        window.clearTimeout(timeoutId); 
     }
 }

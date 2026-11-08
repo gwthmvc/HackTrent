@@ -11,7 +11,6 @@ export default function Register() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [localError, setLocalError] = useState<string | null>(null);
     const errorRef = useRef<HTMLParagraphElement>(null);
-    const handledSignupRef = useRef(false);
     const navigate = useNavigate();
 
     useEffect(() => {
