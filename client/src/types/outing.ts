@@ -1,3 +1,9 @@
+import type {
+    DiscoveredPlace,
+    PlaceSearchAnchor,
+    PlacesSource,
+} from './places';
+
 export type DataSource = {
     name: string;
     url?: string | null;
@@ -71,6 +77,19 @@ export type OutingJourneys = {
     limitations: string[];
 };
 
+export type OutingPlaces = {
+    areaId: string;
+    areaName: string;
+    anchor: PlaceSearchAnchor;
+    radiusMeters: number;
+    retrievedAt: string;
+    dataTimestamp: string | null;
+    cached: boolean;
+    totalAvailable: number;
+    places: DiscoveredPlace[];
+    source: PlacesSource;
+};
+
 export type VerifiedLocation = {
     id: string;
     name: string;
@@ -130,6 +149,7 @@ export type OutingPlan = {
     itinerary: ItineraryStop[];
     transit: Availability<TransitObservation>;
     journeys: OutingJourneys;
+    places: OutingPlaces | null;
     policeIncidents: {
         status: 'unavailable';
         reason: string;

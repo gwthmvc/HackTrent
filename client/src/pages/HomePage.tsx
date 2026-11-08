@@ -9,10 +9,8 @@ import {
 import { auth0ApiScope, auth0Audience, isAuth0ApiConfigured } from '../auth/config';
 import { generateOuting, isOutingPlannerConfigured } from '../services/api';
 import { searchEvents } from '../services/eventsApi';
-import { searchPlaces } from '../services/placesApi';
 import { fetchTransitContext, isTransitApiConfigured } from '../services/transitApi';
 import type { DashboardLocationState } from '../types/navigation';
-import type { EventSearchResponse } from '../types/events';
 import { extractPromptStartingLocation } from '../utils/startingLocation';
 import '../styles/HomePage.css';
 
@@ -23,39 +21,6 @@ const EXAMPLE_PROMPTS = [
     'An accessible outdoor afternoon near Kingston',
     'A family day trip using public transit',
 ];
-
-const EVENT_MATCH_STOP_WORDS = new Set([
-    'find', 'somewhere', 'near', 'game', 'event', 'show', 'this', 'that', 'with',
-    'from', 'have', 'want', 'would', 'could', 'please', 'there', 'where', 'around',
-]);
-
-function eventDestination(
-    request: string,
-    context?: EventSearchResponse,
-): { destinationName: string; destinationLatitude: number; destinationLongitude: number } | undefined {
-    if (!context) return undefined;
-    const requestTokens = new Set(
-        request.toLocaleLowerCase('en-CA').match(/[a-z0-9]+/g)
-            ?.filter((token) => token.length >= 4 && !EVENT_MATCH_STOP_WORDS.has(token)) ?? [],
-    );
-
-    const candidates = context.events.flatMap((event) => {
-        if (event.venue.coordinateStatus !== 'verified'
-            || event.venue.latitude === null
-            || event.venue.longitude === null) return [];
-        const searchable = `${event.name} ${event.venue.name}`.toLocaleLowerCase('en-CA');
-        const score = [...requestTokens].filter((token) => searchable.includes(token)).length;
-        return [{ event, score }];
-    }).sort((left, right) => right.score - left.score);
-
-    const match = candidates[0];
-    if (!match || match.score < 2) return undefined;
-    return {
-        destinationName: `${match.event.name} at ${match.event.venue.name}`,
-        destinationLatitude: match.event.venue.latitude as number,
-        destinationLongitude: match.event.venue.longitude as number,
-    };
-}
 
 function SparkleIcon() {
     return (
@@ -123,17 +88,14 @@ export default function HomePage() {
             let transitError: string | undefined;
             let eventsContext: DashboardLocationState['eventsContext'];
             let eventsError: string | undefined;
-            let placesContext: DashboardLocationState['placesContext'];
             let placesError: string | undefined;
 
             if (!isTransitApiConfigured) {
                 transitError = 'Transit API URL is not configured.';
                 eventsError = 'SmartMove API URL is not configured.';
-                placesError = 'SmartMove API URL is not configured.';
             } else if (!isAuth0ApiConfigured || !auth0Audience) {
                 transitError = 'Auth0 API audience is not configured for secure transit access.';
                 eventsError = 'Auth0 API audience is not configured for secure event search.';
-                placesError = 'Auth0 API audience is not configured for secure place search.';
             } else {
                 try {
                     accessToken = await getAccessTokenSilently({
@@ -150,7 +112,6 @@ export default function HomePage() {
                         ? tokenError.message
                         : 'Verified transit observations are unavailable.';
                     eventsError = transitError;
-                    placesError = transitError;
                 }
 
                 if (accessToken) {
@@ -177,16 +138,6 @@ export default function HomePage() {
                             : 'Ticketmaster events are unavailable.';
                     }
 
-                    try {
-                        placesContext = await searchPlaces({
-                            ...searchRequest,
-                            ...eventDestination(request, eventsContext),
-                        }, accessToken);
-                    } catch (placesRequestError) {
-                        placesError = placesRequestError instanceof Error
-                            ? placesRequestError.message
-                            : 'OpenStreetMap places are unavailable.';
-                    }
                 }
             }
 
@@ -200,7 +151,6 @@ export default function HomePage() {
                     transitError,
                     eventsContext,
                     eventsError,
-                    placesContext,
                     placesError,
                     integrationUnavailable: true,
                 };
@@ -219,6 +169,13 @@ export default function HomePage() {
                     ? { date: departureDate, time: departureTime }
                     : {}),
             }, accessToken);
+            const placesContext = plan.places ?? undefined;
+            if (plan.places === null) {
+                const placeStatus = plan.sourceStatus.places;
+                placesError = [placeStatus.code, placeStatus.reason]
+                    .filter((value): value is string => Boolean(value))
+                    .join(': ') || 'OpenStreetMap places are unavailable.';
+            }
             const state: DashboardLocationState = {
                 request,
                 startingLocation: effectiveStartingLocation,

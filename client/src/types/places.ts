@@ -11,26 +11,28 @@ export type DiscoveredPlace = {
     distanceMeters: number;
     sourceUrl: string;
 };
+export type PlaceSearchAnchor = {
+    name: string;
+    latitude: number;
+    longitude: number;
+    kind: 'verified_destination' | 'area_center';
+};
+export type PlacesSource = {
+    name: string;
+    url: string;
+    service: string;
+};
 export type PlaceSearchResponse = {
     areaId: string;
     areaName: string;
-    anchor: {
-        name: string;
-        latitude: number;
-        longitude: number;
-        kind: 'verified_destination' | 'area_center';
-    };
+    anchor: PlaceSearchAnchor;
     radiusMeters: number;
     retrievedAt: string;
     dataTimestamp: string | null;
     cached: boolean;
     totalAvailable: number;
     places: DiscoveredPlace[];
-    source: {
-        name: string;
-        url: string;
-        service: string;
-    };
+    source: PlacesSource;
 };
 export type PlaceSearchRequest = {
     startingLocation: string;
@@ -39,4 +41,3 @@ export type PlaceSearchRequest = {
     destinationLatitude?: number;
     destinationLongitude?: number;
 };
-

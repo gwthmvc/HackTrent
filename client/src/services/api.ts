@@ -4,6 +4,7 @@ import type {
     GenerateOutingRequest,
     ItineraryStop,
     OutingPlan,
+    OutingPlaces,
     OutingRecommendation,
     PriceRange,
     ScheduledJourney,
@@ -148,6 +149,57 @@ function isSourceStatus(value: unknown): boolean {
         && isNullableString(value.reason);
 }
 
+function isCoordinate(value: unknown, min: number, max: number): value is number {
+    return typeof value === 'number'
+        && Number.isFinite(value)
+        && value >= min
+        && value <= max;
+}
+
+function isPlace(value: unknown): boolean {
+    return isObject(value)
+        && isString(value.id)
+        && isString(value.name)
+        && (value.category === 'food'
+            || value.category === 'parks_outdoors'
+            || value.category === 'culture'
+            || value.category === 'entertainment_family')
+        && isString(value.subtype)
+        && (value.address === null || isString(value.address))
+        && isCoordinate(value.latitude, -90, 90)
+        && isCoordinate(value.longitude, -180, 180)
+        && typeof value.distanceMeters === 'number'
+        && Number.isInteger(value.distanceMeters)
+        && value.distanceMeters >= 0
+        && isString(value.sourceUrl);
+}
+
+function isOutingPlaces(value: unknown): value is OutingPlaces {
+    return isObject(value)
+        && isString(value.areaId)
+        && isString(value.areaName)
+        && isObject(value.anchor)
+        && isString(value.anchor.name)
+        && isCoordinate(value.anchor.latitude, -90, 90)
+        && isCoordinate(value.anchor.longitude, -180, 180)
+        && (value.anchor.kind === 'verified_destination' || value.anchor.kind === 'area_center')
+        && typeof value.radiusMeters === 'number'
+        && Number.isInteger(value.radiusMeters)
+        && value.radiusMeters >= 0
+        && isString(value.retrievedAt)
+        && (value.dataTimestamp === null || isString(value.dataTimestamp))
+        && typeof value.cached === 'boolean'
+        && typeof value.totalAvailable === 'number'
+        && Number.isInteger(value.totalAvailable)
+        && value.totalAvailable >= 0
+        && Array.isArray(value.places)
+        && value.places.every(isPlace)
+        && isObject(value.source)
+        && isString(value.source.name)
+        && isString(value.source.url)
+        && isString(value.source.service);
+}
+
 function isTransit(value: unknown): value is Availability<TransitObservation> {
     if (!isObject(value)) return false;
     if (value.status === 'unavailable') return isString(value.reason);
@@ -178,7 +230,8 @@ function isOutingPlan(value: unknown): value is OutingPlan {
         && isSourceStatus(value.sourceStatus.events)
         && isSourceStatus(value.sourceStatus.places)
         && isSourceStatus(value.sourceStatus.transit)
-        && isSourceStatus(value.sourceStatus.journeys);
+        && isSourceStatus(value.sourceStatus.journeys)
+        && (value.places === null || isOutingPlaces(value.places));
 }
 
 export async function generateOuting(
