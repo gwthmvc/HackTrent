@@ -145,9 +145,7 @@ export default function HomePage() {
                                 <p id="planner-hint">Press Ctrl + Enter to plan</p>
                                 <p
                                     id="planner-status"
-                                    className={isOutingPlannerConfigured || (isTransitApiConfigured && isAuth0ApiConfigured)
-                                        ? 'integration-status configured'
-                                        : 'integration-status'}
+                                    className="integration-status configured"
                                 >
                                     <span aria-hidden="true" />
                                     Gemini chat endpoint
