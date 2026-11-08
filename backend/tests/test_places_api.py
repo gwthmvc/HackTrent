@@ -234,6 +234,20 @@ def test_upstream_failures_are_sanitized(upstream_response, status, code) -> Non
         assert "Events and transit are still available" in response.json()["error"]["message"]
 
 
+def test_timeout_failures_are_cached_without_a_second_upstream_call() -> None:
+    upstream = Upstream(httpx.ReadTimeout("timed out"))
+    client, service = make_client(upstream)
+
+    with client:
+        first = client.post("/api/places/search", json=DURHAM_BODY)
+        second = client.post("/api/places/search", json=DURHAM_BODY)
+
+    assert first.status_code == second.status_code == 504
+    assert first.json()["error"]["code"] == second.json()["error"]["code"] == "places_upstream_timeout"
+    assert service.upstream_calls == 1
+    assert len(upstream.requests) == 1
+
+
 def test_kingston_area_uses_smaller_radius() -> None:
     upstream = Upstream(httpx.Response(200, json=payload()))
     client, _ = make_client(upstream)

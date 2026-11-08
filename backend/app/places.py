@@ -37,6 +37,7 @@ AREA_RADIUS_METERS = {"durham": 3_500, "kingston": 3_500}
 DESTINATION_RADIUS_METERS = 2_000
 OVERPASS_ELEMENT_LIMIT = 60
 OVERPASS_MAXSIZE_BYTES = 8_000_000
+PLACES_FAILURE_TTL_SECONDS = 300
 
 FOOD_AMENITIES = {"restaurant", "cafe"}
 PARK_LEISURE = {"park", "garden", "nature_reserve"}
@@ -284,6 +285,11 @@ class _CachedPlaces:
     data_timestamp: datetime | None
 
 
+@dataclass(slots=True)
+class _CachedPlacesFailure:
+    error: ApiError
+
+
 @dataclass
 class OverpassPlaceService:
     settings: Settings
@@ -292,6 +298,7 @@ class OverpassPlaceService:
 
     def __post_init__(self) -> None:
         self._cache = TTLCache(self.settings.places_cache_ttl_seconds)
+        self._failure_cache = TTLCache(PLACES_FAILURE_TTL_SECONDS)
         self._minute_limiter = SlidingWindowLimiter(
             self.settings.overpass_max_requests_per_minute,
             60,
@@ -323,10 +330,16 @@ class OverpassPlaceService:
             radius_meters,
             tuple(sorted(categories)),
         )
+        cached_failure = self._failure_cache.get(cache_key)
+        if cached_failure is not None:
+            raise cached_failure.error
         cached = self._cache.get(cache_key)
         from_cache = cached is not None
         if cached is None:
             with self._upstream_lock:
+                cached_failure = self._failure_cache.get(cache_key)
+                if cached_failure is not None:
+                    raise cached_failure.error
                 cached = self._cache.get(cache_key)
                 from_cache = cached is not None
                 if cached is None:
@@ -336,7 +349,12 @@ class OverpassPlaceService:
                         self.settings.overpass_query_timeout_seconds,
                         categories,
                     )
-                    cached = self._fetch(query, anchor, radius_meters)
+                    try:
+                        cached = self._fetch(query, anchor, radius_meters)
+                    except ApiError as error:
+                        if error.status_code in {502, 504}:
+                            self._failure_cache.set(cache_key, _CachedPlacesFailure(error))
+                        raise
                     self._cache.set(cache_key, cached)
 
         return PlaceSearchResponse(
