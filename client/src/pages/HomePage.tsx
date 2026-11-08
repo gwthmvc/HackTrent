@@ -142,20 +142,9 @@ export default function HomePage() {
             }
 
             if (!isOutingPlannerConfigured) {
-                const state: DashboardLocationState = {
-                    request,
-                    startingLocation: effectiveStartingLocation,
-                    startingLocationSource,
-                    startingPoint,
-                    transitContext,
-                    transitError,
-                    eventsContext,
-                    eventsError,
-                    placesError,
-                    integrationUnavailable: true,
-                };
-                navigate('/dashboard', { state });
-                return;
+                throw new Error(
+                    'Trip planning is unavailable because the backend generation endpoint is not configured.',
+                );
             }
 
             if (!accessToken) {

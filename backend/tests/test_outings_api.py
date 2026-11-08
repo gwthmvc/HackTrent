@@ -232,6 +232,30 @@ def test_all_sources_succeed():
     assert body["transit"]["items"][0]["id"] == "bus-1"
 
 
+def test_whitespace_only_outing_request_is_rejected():
+    client, _ = make_client(Upstream(ok(tm_payload())), Upstream(ok({"elements": []})))
+    with client:
+        response = client.post(
+            "/api/outings/generate",
+            json={"startingLocation": "Oshawa, Ontario", "outingRequest": "   "},
+        )
+    assert response.status_code == 422
+    assert response.json()["error"]["code"] == "invalid_request"
+
+
+def test_event_search_with_no_matching_events_is_empty_success():
+    client, _ = make_client(
+        Upstream(ok(tm_payload())),
+        Upstream(ok({"elements": []})),
+    )
+    with client:
+        response = client.post("/api/outings/generate", json=BODY)
+    body = response.json()
+    assert response.status_code == 200
+    assert body["sourceStatus"]["events"]["status"] == "available"
+    assert "0 events found." in body["summary"]["description"]
+
+
 def test_outing_places_match_place_search():
     place_elements = [
         {
@@ -448,6 +472,25 @@ def test_journey_requires_departure_time(tmp_path):
                 "date": "2026-11-09",
             },
         ).json()
+    assert body["journeys"]["status"] == "unavailable"
+    assert body["journeys"]["code"] == "departure_time_required"
+
+
+def test_date_without_time_processes_events_and_places(tmp_path):
+    client, _ = journey_client(tmp_path)
+    with client:
+        response = client.post(
+            "/api/outings/generate",
+            json={
+                "startingLocation": "Durham College, Oshawa",
+                "outingRequest": "Things to do",
+                "date": "2026-11-09",
+            },
+        )
+    body = response.json()
+    assert response.status_code == 200
+    assert body["sourceStatus"]["events"]["status"] == "available"
+    assert body["sourceStatus"]["places"]["status"] == "available"
     assert body["journeys"]["status"] == "unavailable"
     assert body["journeys"]["code"] == "departure_time_required"
 

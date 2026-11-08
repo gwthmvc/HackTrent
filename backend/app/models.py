@@ -2,7 +2,7 @@ import datetime as dt
 from datetime import datetime
 from typing import Annotated, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 from pydantic.alias_generators import to_camel
 
 
@@ -260,6 +260,13 @@ class OutingPlanRequest(ApiModel):
     interests: list[Annotated[str, Field(min_length=1, max_length=40)]] = Field(
         default_factory=list, max_length=5,
     )
+
+    @field_validator("outing_request")
+    @classmethod
+    def validate_outing_request_content(cls, value: str) -> str:
+        if not value.strip():
+            raise ValueError("outing request must not be blank")
+        return value
 
 
 class OutingDataSource(ApiModel):
