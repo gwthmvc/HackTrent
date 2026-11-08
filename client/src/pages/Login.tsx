@@ -16,7 +16,7 @@ export default function Login() {
 
     useEffect(() => {
         if (isAuthenticated) {
-            navigate('/dashboard', { replace: true });
+            navigate('/home', { replace: true });
         }
     }, [isAuthenticated, navigate]);
 
@@ -43,7 +43,7 @@ export default function Login() {
         try {
             await loginWithRedirect({
                 appState: {
-                    returnTo: '/dashboard',
+                    returnTo: '/home',
                 },
                 authorizationParams: {
                     prompt: 'login',
