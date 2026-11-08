@@ -979,6 +979,12 @@
     }
 }
 
+@media (max-width: 480px) {
+    .scheduled-journey-timeline .timeline-label-date {
+        display: none;
+    }
+}
+
 @media (prefers-reduced-motion: reduce) {
     .planner-submit {
         transition: none;

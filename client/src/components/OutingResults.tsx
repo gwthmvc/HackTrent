@@ -39,6 +39,24 @@ function formatDateTime(value: string): string {
     }).format(date);
 }
 
+function formatDate(value: string): string {
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return value;
+    return new Intl.DateTimeFormat('en-CA', {
+        dateStyle: 'medium',
+    }).format(date);
+}
+
+function formatTime(value: string): string {
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return value;
+    return new Intl.DateTimeFormat('en-CA', {
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true,
+    }).format(date);
+}
+
 type JourneyTimelineAxis = {
     start: number;
     end: number;
@@ -366,11 +384,17 @@ export default function OutingResults({ plan }: OutingResultsProps) {
                                                         } as CSSProperties}
                                                         aria-label={`Scheduled journey from ${formatDateTime(journey.scheduledDeparture)} to ${formatDateTime(journey.scheduledArrival)}`}
                                                     >
-                                                        <span className="scheduled-journey-time">{formatDateTime(journey.scheduledDeparture)}</span>
+                                                        <span className="scheduled-journey-time">
+                                                            <span className="timeline-label-date">{formatDate(journey.scheduledDeparture)}, </span>
+                                                            <span className="timeline-label-time">{formatTime(journey.scheduledDeparture)}</span>
+                                                        </span>
                                                         <span className="scheduled-journey-track" aria-hidden="true">
                                                             <span className="scheduled-journey-bar" />
                                                         </span>
-                                                        <span className="scheduled-journey-time">{formatDateTime(journey.scheduledArrival)}</span>
+                                                        <span className="scheduled-journey-time">
+                                                            <span className="timeline-label-date">{formatDate(journey.scheduledArrival)}, </span>
+                                                            <span className="timeline-label-time">{formatTime(journey.scheduledArrival)}</span>
+                                                        </span>
                                                     </div>
                                                 )}
                                                 <p className="result-meta">Boards at {journey.boardingStop.name}, {formatDateTime(journey.scheduledDeparture)}</p>
