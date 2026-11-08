@@ -394,6 +394,15 @@
     line-height: 1.45;
 }
 
+.shared-map-transit-legend {
+    margin: 0;
+    padding: 0.65rem 1rem 0.8rem;
+    color: var(--home-moss);
+    background: var(--home-cream);
+    font-size: 0.68rem;
+    line-height: 1.4;
+}
+
 .outing-explorer {
     display: grid;
     grid-template-columns: minmax(22rem, 0.9fr) minmax(0, 1.1fr);
@@ -639,6 +648,11 @@
     color: #313943;
     background: #d5d9dd;
     box-shadow: 0 0 0 2px #68717a, 0 3px 8px rgb(17 22 27 / 24%);
+}
+
+.smartmove-transit-marker.historical {
+    opacity: 0.68;
+    filter: saturate(0.7);
 }
 
 .transit-popup-status {

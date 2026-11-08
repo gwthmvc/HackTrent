@@ -688,6 +688,44 @@
     line-height: 1.3 !important;
 }
 
+.scheduled-journey-timeline {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(2rem, 3fr) minmax(0, 1fr);
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.85rem;
+    min-width: 0;
+}
+
+.scheduled-journey-time {
+    color: var(--home-forest);
+    font-size: 0.68rem;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+.scheduled-journey-time:last-child {
+    text-align: right;
+}
+
+.scheduled-journey-track {
+    position: relative;
+    display: block;
+    height: 0.45rem;
+    min-width: 0;
+    background: var(--home-cream);
+    border-radius: 999px;
+}
+
+.scheduled-journey-bar {
+    position: absolute;
+    left: var(--journey-start);
+    width: var(--journey-width);
+    height: 100%;
+    background: var(--home-moss);
+    border-radius: inherit;
+}
+
 .observation-toggle {
     margin-top: 0.8rem;
     color: var(--home-forest);

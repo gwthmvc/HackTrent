@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState, type KeyboardEvent } from 'react';
+import { useCallback, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent } from 'react';
 import { useDashboardMapLayer } from './useDashboardMapLayer';
 import type {
     DataSource,
@@ -37,6 +37,29 @@ function formatDateTime(value: string): string {
         dateStyle: 'medium',
         timeStyle: 'short',
     }).format(date);
+}
+
+type JourneyTimelineAxis = {
+    start: number;
+    end: number;
+};
+
+function journeyTimeline(
+    scheduledDeparture: string,
+    scheduledArrival: string,
+    axis: JourneyTimelineAxis | undefined,
+): { start: string; width: string } | undefined {
+    const departure = new Date(scheduledDeparture).getTime();
+    const arrival = new Date(scheduledArrival).getTime();
+    if (!axis || !Number.isFinite(departure) || !Number.isFinite(arrival) || arrival < departure) {
+        return undefined;
+    }
+    const span = axis.end - axis.start;
+    if (span <= 0) return undefined;
+    return {
+        start: `${((departure - axis.start) / span) * 100}%`,
+        width: `${((arrival - departure) / span) * 100}%`,
+    };
 }
 
 function formatPriceRange(priceRange: PriceRange): string {
@@ -118,6 +141,20 @@ export default function OutingResults({ plan }: OutingResultsProps) {
     const [filter, setFilter] = useState<LocationFilter>('all');
     const [selectedCardKey, setSelectedCardKey] = useState<string | undefined>(cards[0]?.key);
     const cardRefs = useRef<Map<string, HTMLElement>>(new Map());
+    const journeyTimelineAxis = useMemo<JourneyTimelineAxis | undefined>(() => {
+        if (plan.journeys.status !== 'available' || plan.journeys.items.length === 0) {
+            return undefined;
+        }
+        const departures = plan.journeys.items.map((journey) => new Date(journey.scheduledDeparture).getTime());
+        const arrivals = plan.journeys.items.map((journey) => new Date(journey.scheduledArrival).getTime());
+        if (departures.some((value) => !Number.isFinite(value)) || arrivals.some((value) => !Number.isFinite(value))) {
+            return undefined;
+        }
+        return {
+            start: Math.min(...departures),
+            end: Math.max(...arrivals),
+        };
+    }, [plan.journeys]);
 
     const filteredCards = useMemo(
         () => cards.filter((card) => matchesFilter(card, filter)),
@@ -311,11 +348,36 @@ export default function OutingResults({ plan }: OutingResultsProps) {
                         plan.journeys.items.length > 0 ? (
                             <div className="observation-list">
                                 {plan.journeys.items.map((journey) => (
-                                    <article key={journey.tripId}>
-                                        <p><strong>Route {journey.routeNumber}</strong>{journey.headsign && ` · ${journey.headsign}`}</p>
-                                        <p className="result-meta">Boards at {journey.boardingStop.name}, {formatDateTime(journey.scheduledDeparture)}</p>
-                                        <p className="result-meta">Gets off at {journey.alightingStop.name}, {formatDateTime(journey.scheduledArrival)}</p>
-                                    </article>
+                                    (() => {
+                                        const timeline = journeyTimeline(
+                                            journey.scheduledDeparture,
+                                            journey.scheduledArrival,
+                                            journeyTimelineAxis,
+                                        );
+                                        return (
+                                            <article key={journey.tripId}>
+                                                <p><strong>Route {journey.routeNumber}</strong>{journey.headsign && ` · ${journey.headsign}`}</p>
+                                                {timeline && (
+                                                    <div
+                                                        className="scheduled-journey-timeline"
+                                                        style={{
+                                                            '--journey-start': timeline.start,
+                                                            '--journey-width': timeline.width,
+                                                        } as CSSProperties}
+                                                        aria-label={`Scheduled journey from ${formatDateTime(journey.scheduledDeparture)} to ${formatDateTime(journey.scheduledArrival)}`}
+                                                    >
+                                                        <span className="scheduled-journey-time">{formatDateTime(journey.scheduledDeparture)}</span>
+                                                        <span className="scheduled-journey-track" aria-hidden="true">
+                                                            <span className="scheduled-journey-bar" />
+                                                        </span>
+                                                        <span className="scheduled-journey-time">{formatDateTime(journey.scheduledArrival)}</span>
+                                                    </div>
+                                                )}
+                                                <p className="result-meta">Boards at {journey.boardingStop.name}, {formatDateTime(journey.scheduledDeparture)}</p>
+                                                <p className="result-meta">Gets off at {journey.alightingStop.name}, {formatDateTime(journey.scheduledArrival)}</p>
+                                            </article>
+                                        );
+                                    })()
                                 ))}
                             </div>
                         ) : <p className="unavailable-note">No direct scheduled trip found.</p>

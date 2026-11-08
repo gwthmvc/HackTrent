@@ -36,6 +36,10 @@ function formatTransitTime(value: string): string {
     return Number.isNaN(parsed.getTime()) ? value : parsed.toLocaleString('en-CA');
 }
 
+function sentencePeriod(value: string): string {
+    return value.endsWith('.') ? '' : '.';
+}
+
 function TransitDataStatus({
     context,
     error,
@@ -62,6 +66,7 @@ function TransitDataStatus({
     const agencyName = context.agencyId === 'durham'
         ? 'Durham Region Transit'
         : 'Kingston Transit';
+    const formattedLatestObservation = formatTransitTime(context.latestObservationAt);
 
     return (
         <aside className={`transit-data-status ${context.status}`} role="status">
@@ -78,7 +83,7 @@ function TransitDataStatus({
             <p>
                 {agencyName}: {context.vehicles.length} verified position{context.vehicles.length === 1 ? '' : 's'}.
                 {' '}{currentCount} current, {staleCount} stale. Latest observation{' '}
-                {formatTransitTime(context.latestObservationAt)}. These are vehicle observations only;
+                {formattedLatestObservation}{sentencePeriod(formattedLatestObservation)} These are vehicle observations only;
                 no route directions or arrival estimates are inferred.
             </p>
         </aside>

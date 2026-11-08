@@ -35,6 +35,32 @@ const LAYER_PREFIXES: Record<DashboardMapLayerId, string> = {
 };
 
 const EMPTY_STOP_NUMBERS = new Map<string, number>();
+const SIGHTING_RADIUS_KM = 5;
+
+function haversineDistanceKm(
+    latitudeA: number,
+    longitudeA: number,
+    latitudeB: number,
+    longitudeB: number,
+): number {
+    const toRadians = (degrees: number) => degrees * Math.PI / 180;
+    const latitudeDelta = toRadians(latitudeB - latitudeA);
+    const longitudeDelta = toRadians(longitudeB - longitudeA);
+    const a = Math.sin(latitudeDelta / 2) ** 2
+        + Math.cos(toRadians(latitudeA))
+        * Math.cos(toRadians(latitudeB))
+        * Math.sin(longitudeDelta / 2) ** 2;
+    return 6371 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+function formatObservationTime(value: string): string {
+    const parsed = new Date(value);
+    return Number.isNaN(parsed.getTime()) ? value : parsed.toLocaleString('en-CA');
+}
+
+function sentencePeriod(value: string): string {
+    return value.endsWith('.') ? '' : '.';
+}
 
 function compositeLocationId(layerId: DashboardMapLayerId, locationId: string): string {
     return `${layerId}::${locationId}`;
@@ -105,6 +131,43 @@ function SharedDashboardMap({
     const visibleLayers = useMemo(
         () => registeredLayers.filter((layer) => layerVisibility[layer.id] !== false),
         [layerVisibility, registeredLayers],
+    );
+    const nearbyTransitVehicles = useMemo(() => {
+        if (!startingPoint
+            || !Number.isFinite(startingPoint.latitude)
+            || !Number.isFinite(startingPoint.longitude)) {
+            return transitVehicles;
+        }
+        return transitVehicles.filter((vehicle) => haversineDistanceKm(
+            startingPoint.latitude,
+            startingPoint.longitude,
+            vehicle.latitude,
+            vehicle.longitude,
+        ) <= SIGHTING_RADIUS_KM);
+    }, [startingPoint, transitVehicles]);
+    const latestNearbyObservation = useMemo(
+        () => nearbyTransitVehicles.reduce<string | undefined>((latest, vehicle) => {
+            if (!latest || new Date(vehicle.observedAt).getTime() > new Date(latest).getTime()) {
+                return vehicle.observedAt;
+            }
+            return latest;
+        }, undefined),
+        [nearbyTransitVehicles],
+    );
+    const transitLegend = startingPoint
+        && Number.isFinite(startingPoint.latitude)
+        && Number.isFinite(startingPoint.longitude)
+        ? latestNearbyObservation
+        ? (() => {
+            const formattedObservation = formatObservationTime(latestNearbyObservation);
+            return `Historical sightings, not live. Last observed ${formattedObservation}${sentencePeriod(formattedObservation)}`;
+        })()
+            : 'No historical sightings within 5 km of your starting point.'
+        : 'Historical sightings across Durham Region, not live.';
+    const hasStartingCoordinates = Boolean(
+        startingPoint
+        && Number.isFinite(startingPoint.latitude)
+        && Number.isFinite(startingPoint.longitude),
     );
 
     const mapContent = useMemo(() => {
@@ -183,13 +246,15 @@ function SharedDashboardMap({
                         onClick={() => setShowTransit((current) => !current)}
                     >
                         <span aria-hidden="true" />
-                        TigerData ({transitVehicles.length})
+                        {hasStartingCoordinates
+                            ? `Nearby sightings (${nearbyTransitVehicles.length})`
+                            : `TigerData (${nearbyTransitVehicles.length})`}
                     </button>
                 )}
             </div>
             <VerifiedMap
                 startingPoint={startingPoint}
-                transitVehicles={showTransit ? transitVehicles : []}
+                transitVehicles={showTransit ? nearbyTransitVehicles : []}
                 locations={mapContent.locations}
                 routes={mapContent.routes}
                 selectedLocationId={selectedLocationId}
@@ -204,6 +269,7 @@ function SharedDashboardMap({
                 Event, place, itinerary, and vehicle markers share this map. TigerData points are observations,
                 not inferred routes or arrival estimates.
             </p>
+            {transitVehicles.length > 0 && <p className="shared-map-transit-legend">{transitLegend}</p>}
         </aside>
     );
 }

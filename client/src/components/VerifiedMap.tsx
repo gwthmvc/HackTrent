@@ -105,7 +105,7 @@ function startingMarkerIcon() {
 function transitMarkerIcon(freshness: TransitVehicleObservation['freshness']['status']) {
     return divIcon({
         className: 'smartmove-marker-shell',
-        html: `<span class="smartmove-transit-marker ${freshness}"><b aria-hidden="true">T</b></span>`,
+        html: `<span class="smartmove-transit-marker historical ${freshness}"><b aria-hidden="true">T</b></span>`,
         iconSize: [30, 30],
         iconAnchor: [15, 15],
         popupAnchor: [0, -17],
