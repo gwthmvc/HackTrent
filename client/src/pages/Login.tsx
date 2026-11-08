@@ -1,25 +1,17 @@
 import '../styles/Login.css'
 import { useAuth0 } from '@auth0/auth0-react'
 import { useEffect, useRef, useState } from 'react'
-import { Link, useNavigate } from 'react-router'
+import { Link } from 'react-router'
 import { isAuth0Configured } from '../auth/config'
 
 export default function Login() {
-    const { error, isAuthenticated, isLoading, loginWithRedirect } = useAuth0();
+    const { error, isLoading, loginWithRedirect } = useAuth0();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [localError, setLocalError] = useState<string | null>(null);
     const [successMessage] = useState<string | null>(
         () => sessionStorage.getItem('hacktrent_signup_message'),
     );
     const errorRef = useRef<HTMLParagraphElement>(null);
-    const navigate = useNavigate();
-
-    useEffect(() => {
-        if (isAuthenticated) {
-            navigate('/home', { replace: true });
-        }
-    }, [isAuthenticated, navigate]);
-
     useEffect(() => {
         if (successMessage) {
             sessionStorage.removeItem('hacktrent_signup_message');
