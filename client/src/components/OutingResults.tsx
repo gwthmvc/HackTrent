@@ -75,6 +75,7 @@ function SourceLine({ source }: { source: DataSource }) {
 }
 
 export default function OutingResults({ plan }: OutingResultsProps) {
+    const [showAllObservations, setShowAllObservations] = useState(false);
     const stopNumbers = useMemo(() => {
         const numbers = new Map<string, number>();
         plan.itinerary.forEach((stop, index) => {
@@ -276,15 +277,28 @@ export default function OutingResults({ plan }: OutingResultsProps) {
                     <h3 id="transit-heading">Transit observations</h3>
                     {plan.transit.status === 'available' ? (
                         plan.transit.items.length > 0 ? (
-                            <div className="observation-list">
-                                {plan.transit.items.map((observation) => (
-                                    <article key={observation.id}>
+                            <>
+                                <div className="observation-list">
+                                {(showAllObservations ? plan.transit.items : plan.transit.items.slice(0, 5)).map((observation) => (
+                                    <article className="transit-observation-row" key={observation.id}>
                                         <p>{observation.description}</p>
                                         <p className="result-meta">Observed {formatDateTime(observation.observedAt)} · {observation.freshness}</p>
-                                        <SourceLine source={observation.source} />
                                     </article>
                                 ))}
-                            </div>
+                                </div>
+                                {plan.transit.items.length > 5 && (
+                                    <button
+                                        className="observation-toggle"
+                                        type="button"
+                                        onClick={() => setShowAllObservations((expanded) => !expanded)}
+                                    >
+                                        {showAllObservations
+                                            ? 'Show fewer'
+                                            : `Show all ${plan.transit.items.length} observations`}
+                                    </button>
+                                )}
+                                <SourceLine source={plan.transit.items[0].source} />
+                            </>
                         ) : <p className="unavailable-note">Transit information unavailable: no verified observations were returned.</p>
                     ) : <p className="unavailable-note">Transit information unavailable: {plan.transit.reason}</p>}
                     {plan.transit.coverage && <p className="coverage-note">Coverage: {plan.transit.coverage}</p>}
@@ -299,9 +313,8 @@ export default function OutingResults({ plan }: OutingResultsProps) {
                                 {plan.journeys.items.map((journey) => (
                                     <article key={journey.tripId}>
                                         <p><strong>Route {journey.routeNumber}</strong>{journey.headsign && ` · ${journey.headsign}`}</p>
-                                        <p className="result-meta">
-                                            {formatDateTime(journey.scheduledDeparture)} to {formatDateTime(journey.scheduledArrival)}
-                                        </p>
+                                        <p className="result-meta">Boards at {journey.boardingStop.name}, {formatDateTime(journey.scheduledDeparture)}</p>
+                                        <p className="result-meta">Gets off at {journey.alightingStop.name}, {formatDateTime(journey.scheduledArrival)}</p>
                                     </article>
                                 ))}
                             </div>
