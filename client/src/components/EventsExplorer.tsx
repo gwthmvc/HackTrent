@@ -213,8 +213,9 @@ export default function EventsExplorer({ context, error }: EventsExplorerProps) 
                         })}
                         {events.length === 0 && (
                             <p className="unavailable-note">
-                                Ticketmaster returned no events in {context.areaName} for {context.window.description}.
-                                Try a different date or broader interests.
+                                {context.window.timeFrom && context.window.timeTo
+                                    ? `No Ticketmaster events in ${context.areaName} between ${context.window.timeFrom} and ${context.window.timeTo} on ${new Date(context.window.start).toLocaleDateString('en-CA', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}. Events may exist outside this time.`
+                                    : `No Ticketmaster events in ${context.areaName} for ${context.window.description}.`}
                             </p>
                         )}
                     </div>
