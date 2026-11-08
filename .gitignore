@@ -237,3 +237,8 @@ logs/
 .env.*.local
 *.pem
 *.key
+
+# local AI context
+CLAUDE.md
+CLAUDE_PROJECT_CONTEXT.md
+docs/HANDOFF.md
