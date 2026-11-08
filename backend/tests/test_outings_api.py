@@ -256,6 +256,25 @@ def test_event_search_with_no_matching_events_is_empty_success():
     assert "0 events found." in body["summary"]["description"]
 
 
+def test_time_filter_summary_reports_pre_filter_event_count():
+    client, _ = make_client(
+        Upstream(ok(tm_payload(tm_event("event-1")))),
+        Upstream(ok({"elements": []})),
+    )
+    with client:
+        response = client.post(
+            "/api/outings/generate",
+            json={
+                **BODY,
+                "date": "2026-11-14",
+                "time": "07:30",
+            },
+        )
+    body = response.json()
+    assert response.status_code == 200
+    assert "1 events found on 2026-11-14; 0 start within the requested time window. Clear the time to see all events." in body["summary"]["description"]
+
+
 def test_outing_places_match_place_search():
     place_elements = [
         {

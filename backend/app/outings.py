@@ -323,7 +323,19 @@ class OutingOrchestrator:
         )
         summary_parts = []
         if event_status.status == "available":
-            summary_parts.append(f"{len(events)} events found.")
+            if (
+                events_response
+                and events_response.window.time_from is not None
+                and len(events) < events_response.total_available
+            ):
+                event_date = events_response.window.start.astimezone(LOCAL_TZ).date().isoformat()
+                summary_parts.append(
+                    f"{events_response.total_available} events found on {event_date}; "
+                    f"{len(events)} start within the requested time window. "
+                    "Clear the time to see all events.",
+                )
+            else:
+                summary_parts.append(f"{len(events)} events found.")
         else:
             summary_parts.append(
                 f"Events could not be searched ({event_status.code}).",
