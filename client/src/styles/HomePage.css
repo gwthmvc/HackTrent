@@ -252,126 +252,6 @@
     text-transform: uppercase;
 }
 
-.starting-location-field {
-    margin-bottom: var(--planner-field-gap);
-    padding: 0.9rem 1rem;
-    background: var(--planner-panel-background);
-    border: 1px solid var(--planner-panel-border);
-    border-radius: 1rem;
-    box-shadow: var(--planner-panel-shadow);
-}
-
-.starting-location-field > label {
-    display: block;
-    margin-bottom: 0.5rem;
-    color: var(--home-forest);
-    font-size: 0.72rem;
-    font-weight: 800;
-    letter-spacing: 0.09em;
-    text-transform: uppercase;
-}
-
-.starting-location-input {
-    display: flex;
-    align-items: center;
-    gap: 0.65rem;
-}
-
-.starting-location-input > span {
-    display: grid;
-    width: 1.8rem;
-    height: 1.8rem;
-    flex: 0 0 auto;
-    place-items: center;
-    color: var(--home-forest);
-    background: var(--home-gold);
-    border-radius: 50%;
-    font-size: 0.55rem;
-}
-
-.starting-location-input input {
-    width: 100%;
-    min-width: 0;
-    height: 2.65rem;
-    padding: 0.7rem 0.8rem;
-    color: var(--home-ink);
-    background: var(--planner-input-background);
-    border: 1px solid var(--planner-input-border);
-    border-radius: 0.7rem;
-    font: inherit;
-    font-size: 0.95rem;
-}
-
-.starting-location-input input:focus,
-.planner-departure-fields input:focus {
-    border-color: var(--home-forest);
-    outline: 3px solid var(--planner-focus-ring);
-    outline-offset: 1px;
-}
-
-.starting-location-input input:disabled {
-    cursor: wait;
-    opacity: 0.7;
-}
-
-.starting-location-field > p {
-    margin-top: 0.55rem;
-    color: #596a63;
-    font-size: 0.7rem;
-    line-height: 1.45;
-}
-
-.starting-location-field > p strong {
-    color: var(--home-forest);
-}
-
-.starting-location-field > p span {
-    color: #6b7880;
-}
-
-.planner-departure-fields {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 1rem;
-    margin-bottom: var(--planner-field-gap);
-    padding: 0.9rem 1rem;
-    background: var(--planner-panel-background);
-    border: 1px solid var(--planner-panel-border);
-    border-radius: 1rem;
-    box-shadow: var(--planner-panel-shadow);
-}
-
-.planner-departure-fields > div {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    min-width: 0;
-}
-
-.planner-departure-fields label {
-    color: var(--home-forest);
-    font-size: 0.72rem;
-    font-weight: 800;
-    letter-spacing: 0.09em;
-    text-transform: uppercase;
-}
-
-.planner-departure-fields label span {
-    font-weight: 700;
-}
-
-.planner-departure-fields input {
-    width: 100%;
-    height: 2.65rem;
-    padding: 0.7rem 0.8rem;
-    color: var(--home-ink);
-    background: var(--planner-input-background);
-    border: 1px solid var(--planner-input-border);
-    border-radius: 0.7rem;
-    font: inherit;
-    font-size: 0.95rem;
-}
-
 .ai-input-shell {
     padding: 0.55rem;
     background: var(--home-paper);
@@ -956,10 +836,6 @@
 
     .ai-planner {
         margin-top: 2rem;
-    }
-
-    .planner-departure-fields {
-        grid-template-columns: 1fr;
     }
 
     .ai-input-shell textarea {

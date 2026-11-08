@@ -4,7 +4,6 @@ import { Link, useNavigate } from 'react-router';
 import {
     DEFAULT_STARTING_LOCATION,
     getKnownStartingPoint,
-    STARTING_LOCATION_SUGGESTIONS,
 } from '../config/startingLocations';
 import { auth0ApiScope, auth0Audience, isAuth0ApiConfigured } from '../auth/config';
 import { generateOuting, isOutingPlannerConfigured } from '../services/api';
@@ -35,14 +34,10 @@ export default function HomePage() {
     const { getAccessTokenSilently, logout } = useAuth0();
     const navigate = useNavigate();
     const [message, setMessage] = useState('');
-    const [startingLocation, setStartingLocation] = useState(DEFAULT_STARTING_LOCATION);
-    const [departureDate, setDepartureDate] = useState('');
-    const [departureTime, setDepartureTime] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const errorRef = useRef<HTMLParagraphElement>(null);
-    const startingLocationRef = useRef<HTMLInputElement>(null);
     const promptStartingLocation = useMemo(
         () => extractPromptStartingLocation(message),
         [message],
@@ -62,18 +57,11 @@ export default function HomePage() {
 
     const submitRequest = async () => {
         const request = message.trim();
-        const fieldStartingLocation = startingLocation.trim();
-        const effectiveStartingLocation = promptStartingLocation ?? fieldStartingLocation;
+        const effectiveStartingLocation = promptStartingLocation ?? DEFAULT_STARTING_LOCATION;
 
         if (!request) {
             setError('Tell us what kind of outing you would like to plan.');
             textareaRef.current?.focus();
-            return;
-        }
-
-        if (!effectiveStartingLocation) {
-            setError('Enter a starting location or specify one clearly in your outing request.');
-            startingLocationRef.current?.focus();
             return;
         }
 
@@ -118,9 +106,6 @@ export default function HomePage() {
                     const searchRequest = {
                         startingLocation: effectiveStartingLocation,
                         outingRequest: request,
-                        ...(departureDate && departureTime
-                            ? { date: departureDate, time: departureTime }
-                            : {}),
                     };
                     const [transitResult, eventsResult] = await Promise.allSettled([
                         fetchTransitContext(searchRequest, accessToken),
@@ -157,9 +142,6 @@ export default function HomePage() {
             const plan = await generateOuting({
                 outingRequest: request,
                 startingLocation: effectiveStartingLocation,
-                ...(departureDate && departureTime
-                    ? { date: departureDate, time: departureTime }
-                    : {}),
             }, accessToken);
             const placesContext = plan.places ?? undefined;
             if (plan.places === null) {
@@ -232,58 +214,6 @@ export default function HomePage() {
                         </p>
 
                         <form className="ai-planner" onSubmit={handleSubmit} noValidate aria-busy={isLoading}>
-                            <div className="starting-location-field">
-                                <label htmlFor="starting-location">Starting location</label>
-                                <div className="starting-location-input">
-                                    <span aria-hidden="true">●</span>
-                                    <input
-                                        ref={startingLocationRef}
-                                        id="starting-location"
-                                        list="starting-location-options"
-                                        value={startingLocation}
-                                        onChange={(event) => {
-                                            setStartingLocation(event.target.value);
-                                            if (error) setError(null);
-                                        }}
-                                        disabled={isLoading}
-                                        autoComplete="street-address"
-                                        aria-describedby="starting-location-help"
-                                    />
-                                    <datalist id="starting-location-options">
-                                        {STARTING_LOCATION_SUGGESTIONS.map((location) => (
-                                            <option key={location} value={location} />
-                                        ))}
-                                    </datalist>
-                                </div>
-                                <p id="starting-location-help">
-                                    {promptStartingLocation
-                                        ? <>Prompt departure detected: <strong>{promptStartingLocation}</strong>. This will override the field.</>
-                                        : 'Change this address, or state a departure point clearly in your prompt.'}
-                                    <span> Initial transit-data focus: Durham Region and Kingston. Availability is confirmed only from returned observations.</span>
-                                </p>
-                            </div>
-                            <div className="planner-departure-fields">
-                                <div>
-                                    <label htmlFor="departure-date">Departure date <span>(optional)</span></label>
-                                    <input
-                                        id="departure-date"
-                                        type="date"
-                                        value={departureDate}
-                                        onChange={(event) => setDepartureDate(event.target.value)}
-                                        disabled={isLoading}
-                                    />
-                                </div>
-                                <div>
-                                    <label htmlFor="departure-time">Departure time <span>(optional)</span></label>
-                                    <input
-                                        id="departure-time"
-                                        type="time"
-                                        value={departureTime}
-                                        onChange={(event) => setDepartureTime(event.target.value)}
-                                        disabled={isLoading}
-                                    />
-                                </div>
-                            </div>
                             <label htmlFor="outing-request">Describe your ideal outing</label>
                             <div className="ai-input-shell">
                                 <textarea
