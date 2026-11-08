@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from contextlib import closing
 from datetime import datetime, time, timezone
 from uuid import uuid4
 from zoneinfo import ZoneInfo
@@ -9,16 +10,20 @@ from .models import (
     EventSearchRequest,
     OutingDataSource,
     OutingItineraryItem,
+    OutingJourneys,
     OutingLocation,
     OutingPlanRequest,
     OutingPlanResponse,
     OutingPoliceIncidents,
     OutingRecommendation,
+    OutingScheduledJourney,
     OutingSourceStatus,
     OutingSourceStatuses,
     OutingSummary,
     OutingTransit,
+    JourneyPointInput,
     PlaceSearchRequest,
+    TransitJourneySearchRequest,
     TransitObservation,
 )
 
@@ -27,15 +32,17 @@ POLICE_UNAVAILABLE = "No public-safety data source is implemented."
 
 
 class OutingOrchestrator:
-    def __init__(self, event_service, place_service, transit_service) -> None:
+    def __init__(self, event_service, place_service, transit_service, journey_service=None) -> None:
         self._event_service = event_service
         self._place_service = place_service
         self._transit_service = transit_service
+        self._journey_service = journey_service
 
     def plan(self, request: OutingPlanRequest, subject: str) -> OutingPlanResponse:
         event_status = OutingSourceStatus(status="available")
         place_status = OutingSourceStatus(status="available")
         transit_status = OutingSourceStatus(status="available")
+        journey_status = OutingSourceStatus(status="available")
 
         event_request = EventSearchRequest(
             starting_location=request.starting_location,
@@ -97,6 +104,85 @@ class OutingOrchestrator:
                     status="unavailable", code=error.code, reason=error.message,
                 )
                 places_response = None
+
+        journeys_response = None
+        journeys_no_direct_trip = False
+        if self._journey_service is None:
+            journey_status = OutingSourceStatus(
+                status="unavailable",
+                code="journeys_not_configured",
+                reason="Scheduled transit journeys are not configured.",
+            )
+        elif "durham college" not in request.starting_location.casefold():
+            journey_status = OutingSourceStatus(
+                status="unavailable",
+                code="origin_not_supported",
+                reason="Scheduled journeys are only available from Durham College.",
+            )
+        elif anchor is None:
+            journey_status = OutingSourceStatus(
+                status="unavailable",
+                code="no_verified_destination",
+                reason="No verified event destination is available for scheduled journeys.",
+            )
+        elif request.date is None or request.time is None:
+            journey_status = OutingSourceStatus(
+                status="unavailable",
+                code="departure_time_required",
+                reason="A departure date and time are required for scheduled journeys.",
+            )
+        else:
+            try:
+                origin_stop = self._find_durham_college_stop()
+                if origin_stop is None:
+                    if callable(getattr(self._journey_service, "_connect", None)):
+                        journey_status = OutingSourceStatus(
+                            status="unavailable",
+                            code="origin_not_supported",
+                            reason="No Durham College stop was found in the imported GTFS stops.",
+                        )
+                    else:
+                        journey_request = TransitJourneySearchRequest(
+                            agency_id="durham",
+                            origin=JourneyPointInput(name="Durham College"),
+                            destination=JourneyPointInput(
+                                latitude=anchor.venue.latitude,
+                                longitude=anchor.venue.longitude,
+                            ),
+                            service_date=request.date,
+                            departure_time=request.time,
+                        )
+                        journeys_response = self._journey_service.search(journey_request)
+                        if journeys_response.journeys:
+                            journeys_response = self._journey_service.search(
+                                journey_request.model_copy(
+                                    update={
+                                        "origin": JourneyPointInput(
+                                            stop_id=journeys_response.journeys[0].boarding_stop.stop_id,
+                                        ),
+                                    },
+                                ),
+                            )
+                else:
+                    journeys_response = self._journey_service.search(
+                        TransitJourneySearchRequest(
+                            agency_id="durham",
+                            origin=JourneyPointInput(stop_id=origin_stop),
+                            destination=JourneyPointInput(
+                                latitude=anchor.venue.latitude,
+                                longitude=anchor.venue.longitude,
+                            ),
+                            service_date=request.date,
+                            departure_time=request.time,
+                        ),
+                    )
+            except ApiError as error:
+                if error.code == "unsupported_journey":
+                    journeys_no_direct_trip = True
+                else:
+                    journey_status = OutingSourceStatus(
+                        status="unavailable", code=error.code, reason=error.message,
+                    )
 
         try:
             transit_response = self._transit_service.get_relevant_vehicles(
@@ -198,6 +284,42 @@ class OutingOrchestrator:
                 reason=transit_status.reason or "Transit data is unavailable.",
             )
         )
+        journeys = (
+            OutingJourneys(
+                status="available",
+                timezone=journeys_response.timezone,
+                items=[
+                    OutingScheduledJourney(
+                        **journey.model_dump(),
+                        feed=OutingDataSource(
+                            name="Durham GTFS schedule",
+                            url=journeys_response.feed.source_url,
+                            retrieved_at=journeys_response.feed.imported_at,
+                        ),
+                    )
+                    for journey in journeys_response.journeys
+                ],
+                limitations=(
+                    journeys_response.limitations
+                    if journeys_response.journeys
+                    else [*journeys_response.limitations, "No direct scheduled trip found."]
+                ),
+            )
+            if journeys_response
+            else OutingJourneys(
+                status="available",
+                limitations=[
+                    "Direct scheduled trips only; transfers and real-time arrival predictions are not implemented.",
+                    "No direct scheduled trip found.",
+                ],
+            )
+            if journeys_no_direct_trip
+            else OutingJourneys(
+                status="unavailable",
+                code=journey_status.code,
+                reason=journey_status.reason or "Scheduled transit journeys are unavailable.",
+            )
+        )
         summary_parts = []
         if event_status.status == "available":
             summary_parts.append(f"{len(events)} events found.")
@@ -223,12 +345,28 @@ class OutingOrchestrator:
             recommendations=recommendations,
             itinerary=itinerary,
             transit=transit,
+            journeys=journeys,
             police_incidents=OutingPoliceIncidents(reason=POLICE_UNAVAILABLE),
             locations=locations,
             source_status=OutingSourceStatuses(
                 events=event_status, places=place_status, transit=transit_status,
+                journeys=journey_status,
             ),
         )
+
+    def _find_durham_college_stop(self) -> str | None:
+        connect = getattr(self._journey_service, "_connect", None)
+        resolve_stops = getattr(self._journey_service, "_resolve_stops", None)
+        if not callable(connect) or not callable(resolve_stops):
+            return None
+        with closing(connect()) as connection:
+            stops = resolve_stops(
+                connection,
+                JourneyPointInput(name="Durham College"),
+                800,
+            )
+        matching = [stop for stop in stops if "durham college" in stop.name.casefold()]
+        return matching[0].stop_id if matching else None
 
     @staticmethod
     def _local_start(local_date: str, local_time: str | None) -> datetime | None:

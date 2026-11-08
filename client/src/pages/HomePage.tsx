@@ -71,6 +71,8 @@ export default function HomePage() {
     const navigate = useNavigate();
     const [message, setMessage] = useState('');
     const [startingLocation, setStartingLocation] = useState(DEFAULT_STARTING_LOCATION);
+    const [departureDate, setDepartureDate] = useState('');
+    const [departureTime, setDepartureTime] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -213,6 +215,9 @@ export default function HomePage() {
             const plan = await generateOuting({
                 outingRequest: request,
                 startingLocation: effectiveStartingLocation,
+                ...(departureDate && departureTime
+                    ? { date: departureDate, time: departureTime }
+                    : {}),
             }, accessToken);
             const state: DashboardLocationState = {
                 request,
@@ -307,6 +312,28 @@ export default function HomePage() {
                                         : 'Change this address, or state a departure point clearly in your prompt.'}
                                     <span> Initial transit-data focus: Durham Region and Kingston. Availability is confirmed only from returned observations.</span>
                                 </p>
+                            </div>
+                            <div className="planner-departure-fields">
+                                <div>
+                                    <label htmlFor="departure-date">Departure date <span>(optional)</span></label>
+                                    <input
+                                        id="departure-date"
+                                        type="date"
+                                        value={departureDate}
+                                        onChange={(event) => setDepartureDate(event.target.value)}
+                                        disabled={isLoading}
+                                    />
+                                </div>
+                                <div>
+                                    <label htmlFor="departure-time">Departure time <span>(optional)</span></label>
+                                    <input
+                                        id="departure-time"
+                                        type="time"
+                                        value={departureTime}
+                                        onChange={(event) => setDepartureTime(event.target.value)}
+                                        disabled={isLoading}
+                                    />
+                                </div>
                             </div>
                             <label htmlFor="outing-request">Describe your ideal outing</label>
                             <div className="ai-input-shell">

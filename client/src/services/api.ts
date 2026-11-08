@@ -6,6 +6,8 @@ import type {
     OutingPlan,
     OutingRecommendation,
     PriceRange,
+    ScheduledJourney,
+    ScheduledStop,
     TransitObservation,
     VerifiedLocation,
 } from '../types/outing';
@@ -83,6 +85,48 @@ function isTransitObservation(value: unknown): value is TransitObservation {
         && isSource(value.source);
 }
 
+function isScheduledStop(value: unknown): value is ScheduledStop {
+    return isObject(value)
+        && isString(value.stopId)
+        && isString(value.name)
+        && typeof value.latitude === 'number'
+        && value.latitude >= -90
+        && value.latitude <= 90
+        && typeof value.longitude === 'number'
+        && value.longitude >= -180
+        && value.longitude <= 180;
+}
+
+function isScheduledJourney(value: unknown): value is ScheduledJourney {
+    return isObject(value)
+        && isString(value.tripId)
+        && isString(value.routeId)
+        && isString(value.routeNumber)
+        && isNullableString(value.routeName)
+        && isNullableString(value.headsign)
+        && isScheduledStop(value.boardingStop)
+        && isScheduledStop(value.alightingStop)
+        && isString(value.scheduledDeparture)
+        && isString(value.scheduledArrival)
+        && typeof value.scheduledDurationSeconds === 'number'
+        && Number.isInteger(value.scheduledDurationSeconds)
+        && value.scheduledDurationSeconds >= 0
+        && isNullableString(value.shapeId)
+        && isSource(value.feed);
+}
+
+function isJourneys(value: unknown): boolean {
+    return isObject(value)
+        && (value.status === 'available' || value.status === 'unavailable')
+        && isNullableString(value.code)
+        && isNullableString(value.reason)
+        && isNullableString(value.timezone)
+        && Array.isArray(value.items)
+        && value.items.every(isScheduledJourney)
+        && Array.isArray(value.limitations)
+        && value.limitations.every(isString);
+}
+
 function isLocation(value: unknown): value is VerifiedLocation {
     return isObject(value)
         && isString(value.id)
@@ -124,6 +168,7 @@ function isOutingPlan(value: unknown): value is OutingPlan {
         && Array.isArray(value.itinerary)
         && value.itinerary.every(isItineraryStop)
         && isTransit(value.transit)
+        && isJourneys(value.journeys)
         && isObject(value.policeIncidents)
         && value.policeIncidents.status === 'unavailable'
         && isString(value.policeIncidents.reason)
@@ -132,7 +177,8 @@ function isOutingPlan(value: unknown): value is OutingPlan {
         && isObject(value.sourceStatus)
         && isSourceStatus(value.sourceStatus.events)
         && isSourceStatus(value.sourceStatus.places)
-        && isSourceStatus(value.sourceStatus.transit);
+        && isSourceStatus(value.sourceStatus.transit)
+        && isSourceStatus(value.sourceStatus.journeys);
 }
 
 export async function generateOuting(

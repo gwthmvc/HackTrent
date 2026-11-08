@@ -290,8 +290,34 @@ export default function OutingResults({ plan }: OutingResultsProps) {
                     {plan.transit.coverage && <p className="coverage-note">Coverage: {plan.transit.coverage}</p>}
                 </section>
 
-                <section className="result-panel safety-panel" aria-labelledby="safety-heading">
+                <section className="result-panel transit-panel" aria-labelledby="scheduled-transit-heading">
                     <div className="section-number" aria-hidden="true">03</div>
+                    <h3 id="scheduled-transit-heading">Scheduled transit</h3>
+                    {plan.journeys.status === 'available' ? (
+                        plan.journeys.items.length > 0 ? (
+                            <div className="observation-list">
+                                {plan.journeys.items.map((journey) => (
+                                    <article key={journey.tripId}>
+                                        <p><strong>Route {journey.routeNumber}</strong>{journey.headsign && ` · ${journey.headsign}`}</p>
+                                        <p className="result-meta">
+                                            {formatDateTime(journey.scheduledDeparture)} to {formatDateTime(journey.scheduledArrival)}
+                                        </p>
+                                    </article>
+                                ))}
+                            </div>
+                        ) : <p className="unavailable-note">No direct scheduled trip found.</p>
+                    ) : (
+                        <p className="unavailable-note">
+                            Scheduled transit unavailable{plan.journeys.code && ` (${plan.journeys.code})`}: {plan.journeys.reason}
+                        </p>
+                    )}
+                    {plan.journeys.limitations.map((limitation) => (
+                        <p className="coverage-note" key={limitation}>{limitation}</p>
+                    ))}
+                </section>
+
+                <section className="result-panel safety-panel" aria-labelledby="safety-heading">
+                    <div className="section-number" aria-hidden="true">04</div>
                     <h3 id="safety-heading">Public incident context</h3>
                     <p className="unavailable-note">
                         Police incident information unavailable: {plan.policeIncidents.reason}
@@ -302,7 +328,7 @@ export default function OutingResults({ plan }: OutingResultsProps) {
             <section className="result-panel" aria-labelledby="source-status-heading">
                 <h3 id="source-status-heading">Source status</h3>
                 <ul>
-                    {(['events', 'places', 'transit'] as const).map((sourceName) => {
+                    {(['events', 'places', 'transit', 'journeys'] as const).map((sourceName) => {
                         const status = plan.sourceStatus[sourceName];
                         return (
                             <li key={sourceName}>

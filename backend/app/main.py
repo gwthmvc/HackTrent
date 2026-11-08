@@ -65,6 +65,7 @@ def create_app(
     app.state.journey_service = journey_service or GtfsJourneyService(app_settings)
     app.state.outing_orchestrator = outing_orchestrator or OutingOrchestrator(
         app.state.event_service, app.state.place_service, app.state.transit_service,
+        app.state.journey_service,
     )
 
     app.add_middleware(

@@ -308,6 +308,19 @@ class OutingTransit(ApiModel):
     reason: str | None = None
 
 
+class OutingScheduledJourney(ScheduledTransitJourney):
+    feed: OutingDataSource
+
+
+class OutingJourneys(ApiModel):
+    status: Literal["available", "unavailable"]
+    code: str | None = None
+    reason: str | None = None
+    timezone: str | None = None
+    items: list[OutingScheduledJourney] = Field(default_factory=list)
+    limitations: list[str] = Field(default_factory=list)
+
+
 class OutingPoliceIncidents(ApiModel):
     status: Literal["unavailable"] = "unavailable"
     reason: str
@@ -332,6 +345,7 @@ class OutingSourceStatuses(ApiModel):
     events: OutingSourceStatus
     places: OutingSourceStatus
     transit: OutingSourceStatus
+    journeys: OutingSourceStatus
 
 
 class OutingSummary(ApiModel):
@@ -346,6 +360,7 @@ class OutingPlanResponse(ApiModel):
     recommendations: list[OutingRecommendation]
     itinerary: list[OutingItineraryItem]
     transit: OutingTransit
+    journeys: OutingJourneys
     police_incidents: OutingPoliceIncidents
     locations: list[OutingLocation]
     source_status: OutingSourceStatuses

@@ -40,6 +40,37 @@ export type TransitObservation = {
     source: DataSource;
 };
 
+export type ScheduledStop = {
+    stopId: string;
+    name: string;
+    latitude: number;
+    longitude: number;
+};
+
+export type ScheduledJourney = {
+    tripId: string;
+    routeId: string;
+    routeNumber: string;
+    routeName: string | null;
+    headsign: string | null;
+    boardingStop: ScheduledStop;
+    alightingStop: ScheduledStop;
+    scheduledDeparture: string;
+    scheduledArrival: string;
+    scheduledDurationSeconds: number;
+    shapeId: string | null;
+    feed: DataSource;
+};
+
+export type OutingJourneys = {
+    status: 'available' | 'unavailable';
+    code: string | null;
+    reason: string | null;
+    timezone: string | null;
+    items: ScheduledJourney[];
+    limitations: string[];
+};
+
 export type VerifiedLocation = {
     id: string;
     name: string;
@@ -85,6 +116,7 @@ export type OutingSourceStatuses = {
     events: SourceStatus;
     places: SourceStatus;
     transit: SourceStatus;
+    journeys: SourceStatus;
 };
 
 export type OutingPlan = {
@@ -97,6 +129,7 @@ export type OutingPlan = {
     recommendations: OutingRecommendation[];
     itinerary: ItineraryStop[];
     transit: Availability<TransitObservation>;
+    journeys: OutingJourneys;
     policeIncidents: {
         status: 'unavailable';
         reason: string;
