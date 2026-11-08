@@ -102,10 +102,27 @@ function startingMarkerIcon() {
     });
 }
 
-function transitMarkerIcon(freshness: TransitVehicleObservation['freshness']['status']) {
+function escapeHtml(value: string): string {
+    return value
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+function transitMarkerIcon(
+    freshness: TransitVehicleObservation['freshness']['status'],
+    routeId: string | null,
+) {
+    const label = routeId ? escapeHtml(routeId.slice(0, 4)) : 'T';
+    const ariaLabel = routeId
+        ? `Transit sighting, route ${escapeHtml(routeId)}`
+        : 'Transit sighting, route unknown';
+
     return divIcon({
         className: 'smartmove-marker-shell',
-        html: `<span class="smartmove-transit-marker historical ${freshness}"><b aria-hidden="true">T</b></span>`,
+        html: `<span role="img" aria-label="${ariaLabel}" class="smartmove-transit-marker historical ${freshness}"><b aria-hidden="true">${label}</b></span>`,
         iconSize: [30, 30],
         iconAnchor: [15, 15],
         popupAnchor: [0, -17],
@@ -191,7 +208,7 @@ export default function VerifiedMap({
                     <Marker
                         key={`transit-${vehicle.agencyId}-${vehicle.vehicleId}`}
                         position={[vehicle.latitude, vehicle.longitude]}
-                        icon={transitMarkerIcon(vehicle.freshness.status)}
+                        icon={transitMarkerIcon(vehicle.freshness.status, vehicle.routeId)}
                     >
                         <Popup>
                             <strong>{vehicle.agencyId === 'durham' ? 'Durham Region Transit' : 'Kingston Transit'} observation</strong>
