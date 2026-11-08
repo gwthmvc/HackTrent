@@ -3,7 +3,7 @@ const CHAT_TIMEOUT_MS = 60_000;
 
 export type ChatMessage = {
     role: 'user' | 'model';
-    parts: [{ text: string }];
+    parts: { text: string }[];
 };
 
 export async function sendChatMessage(
