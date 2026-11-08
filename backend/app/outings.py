@@ -334,6 +334,9 @@ class OutingOrchestrator:
                     f"{len(events)} start within the requested time window. "
                     "Clear the time to see all events.",
                 )
+            elif events_response and events_response.window:
+                event_date = events_response.window.start.astimezone(LOCAL_TZ).date().isoformat()
+                summary_parts.append(f"{len(events)} events found on {event_date}.")
             else:
                 summary_parts.append(f"{len(events)} events found.")
         else:

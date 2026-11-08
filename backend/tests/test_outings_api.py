@@ -253,7 +253,7 @@ def test_event_search_with_no_matching_events_is_empty_success():
     body = response.json()
     assert response.status_code == 200
     assert body["sourceStatus"]["events"]["status"] == "available"
-    assert "0 events found." in body["summary"]["description"]
+    assert "0 events found on 2026-11-11." in body["summary"]["description"]
 
 
 def test_time_filter_summary_reports_pre_filter_event_count():
