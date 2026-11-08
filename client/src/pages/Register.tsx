@@ -13,7 +13,7 @@ export default function Register() {
 
     useEffect(() => {
         if (isAuthenticated) {
-            navigate('/dashboard', { replace: true });
+            navigate('/home', { replace: true });
         }
     }, [isAuthenticated, navigate]);
 
@@ -33,6 +33,7 @@ export default function Register() {
         setIsSubmitting(true);
         try {
             await loginWithRedirect({
+                appState: { returnTo: '/home' },
                 authorizationParams: {
                     screen_hint: 'signup',
                 },
@@ -50,7 +51,7 @@ export default function Register() {
 
     return (
         <>
-            <title>Register | HackTrent</title>
+            <title>Register | SmartMove Ontario</title>
             <main>
                 <h1>Register</h1>
 
@@ -64,7 +65,7 @@ export default function Register() {
 
                 <div className="register-container">
                     <div className="form-component">
-                        <p>Create your HackTrent account securely with Auth0.</p>
+                        <p>Create your SmartMove Ontario account securely with Auth0.</p>
                         <button
                             type="button"
                             onClick={handleRegister}

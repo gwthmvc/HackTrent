@@ -1,6 +1,4 @@
 import { Outlet, type RouteObject } from 'react-router';
-
-
 import Dashboard from './pages/Dashboard';
 import HomePage from './pages/HomePage';
 import Login from './pages/Login';

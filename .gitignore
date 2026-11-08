@@ -220,6 +220,9 @@ venv/
 env/
 .pytest_cache/
 
+# Downloaded GTFS schedule cache
+backend/data/gtfs/
+
 # Logs and Caches
 *.log
 logs/

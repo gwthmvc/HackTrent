@@ -13,7 +13,7 @@ export default function Login() {
 
     useEffect(() => {
         if (isAuthenticated) {
-            navigate('/dashboard', { replace: true });
+            navigate('/home', { replace: true });
         }
     }, [isAuthenticated, navigate]);
 
@@ -32,7 +32,9 @@ export default function Login() {
         setLocalError(null);
         setIsSubmitting(true);
         try {
-            await loginWithRedirect();
+            await loginWithRedirect({
+                appState: { returnTo: '/home' },
+            });
         } catch (loginError) {
             setLocalError(loginError instanceof Error ? loginError.message : 'Login failed.');
             setIsSubmitting(false);
@@ -42,7 +44,7 @@ export default function Login() {
 
     return (
         <>
-            <title>Login | HackTrent</title>
+            <title>Login | SmartMove Ontario</title>
             <main aria-labelledby="login-heading">
                 <h1 id="login-heading">Login</h1>
 
@@ -56,7 +58,7 @@ export default function Login() {
 
                 <div className="login-container">
                     <div className="form-component">
-                        <p>Continue securely with your HackTrent account.</p>
+                        <p>Continue securely with your SmartMove Ontario account.</p>
                         <button
                             type="button"
                             onClick={handleLogin}
