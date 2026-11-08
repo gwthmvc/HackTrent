@@ -1,16 +1,7 @@
 import { useAuth0 } from '@auth0/auth0-react';
-import { useEffect, useMemo, useRef, useState, type FormEvent, type KeyboardEvent } from 'react';
-import { Link, useNavigate } from 'react-router';
-import {
-    DEFAULT_STARTING_LOCATION,
-    getKnownStartingPoint,
-} from '../config/startingLocations';
-import { auth0ApiScope, auth0Audience, isAuth0ApiConfigured } from '../auth/config';
-import { generateOuting, isOutingPlannerConfigured } from '../services/api';
-import { searchEvents } from '../services/eventsApi';
-import { fetchTransitContext, isTransitApiConfigured } from '../services/transitApi';
-import type { DashboardLocationState } from '../types/navigation';
-import { extractPromptStartingLocation } from '../utils/startingLocation';
+import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from 'react';
+import { Link } from 'react-router';
+import { sendChatMessage } from '../services/chat';
 import '../styles/HomePage.css';
 
 const EXAMPLE_REQUEST = "I want to take my daughter somewhere fun in Kingston this Saturday. My budget is $60 and we'd like to use public transit.";
@@ -31,17 +22,13 @@ function SparkleIcon() {
 }
 
 export default function HomePage() {
-    const { getAccessTokenSilently, logout } = useAuth0();
-    const navigate = useNavigate();
+    const { logout } = useAuth0();
     const [message, setMessage] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [reply, setReply] = useState<string | null>(null);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const errorRef = useRef<HTMLParagraphElement>(null);
-    const promptStartingLocation = useMemo(
-        () => extractPromptStartingLocation(message),
-        [message],
-    );
 
     useEffect(() => {
         if (error) {
@@ -57,7 +44,6 @@ export default function HomePage() {
 
     const submitRequest = async () => {
         const request = message.trim();
-        const effectiveStartingLocation = promptStartingLocation ?? DEFAULT_STARTING_LOCATION;
 
         if (!request) {
             setError('Tell us what kind of outing you would like to plan.');
@@ -66,104 +52,11 @@ export default function HomePage() {
         }
 
         setError(null);
-        const startingLocationSource = promptStartingLocation ? 'prompt' : 'field';
-        const startingPoint = getKnownStartingPoint(effectiveStartingLocation);
+        setReply(null);
 
         setIsLoading(true);
         try {
-            let accessToken: string | undefined;
-            let transitContext: DashboardLocationState['transitContext'];
-            let transitError: string | undefined;
-            let eventsContext: DashboardLocationState['eventsContext'];
-            let eventsError: string | undefined;
-            let placesError: string | undefined;
-
-            if (!isTransitApiConfigured) {
-                transitError = 'Transit API URL is not configured.';
-                eventsError = 'SmartMove API URL is not configured.';
-            } else if (!isAuth0ApiConfigured || !auth0Audience) {
-                transitError = 'Auth0 API audience is not configured for secure transit access.';
-                eventsError = 'Auth0 API audience is not configured for secure event search.';
-            } else {
-                try {
-                    accessToken = await getAccessTokenSilently({
-                        authorizationParams: {
-                            audience: auth0Audience,
-                            scope: auth0ApiScope,
-                        },
-                    });
-                    if (!accessToken) {
-                        throw new Error('Auth0 did not return an API access token.');
-                    }
-                } catch (tokenError) {
-                    transitError = tokenError instanceof Error
-                        ? tokenError.message
-                        : 'Verified transit observations are unavailable.';
-                    eventsError = transitError;
-                }
-
-                if (accessToken) {
-                    const searchRequest = {
-                        startingLocation: effectiveStartingLocation,
-                        outingRequest: request,
-                    };
-                    const [transitResult, eventsResult] = await Promise.allSettled([
-                        fetchTransitContext(searchRequest, accessToken),
-                        searchEvents(searchRequest, accessToken),
-                    ]);
-                    if (transitResult.status === 'fulfilled') {
-                        transitContext = transitResult.value;
-                    } else {
-                        transitError = transitResult.reason instanceof Error
-                            ? transitResult.reason.message
-                            : 'Verified transit observations are unavailable.';
-                    }
-                    if (eventsResult.status === 'fulfilled') {
-                        eventsContext = eventsResult.value;
-                    } else {
-                        eventsError = eventsResult.reason instanceof Error
-                            ? eventsResult.reason.message
-                            : 'Ticketmaster events are unavailable.';
-                    }
-
-                }
-            }
-
-            if (!isOutingPlannerConfigured) {
-                throw new Error(
-                    'Trip planning is unavailable because the backend generation endpoint is not configured.',
-                );
-            }
-
-            if (!accessToken) {
-                throw new Error('Auth0 API audience is not configured for secure trip planning.');
-            }
-
-            const plan = await generateOuting({
-                outingRequest: request,
-                startingLocation: effectiveStartingLocation,
-            }, accessToken);
-            const placesContext = plan.places ?? undefined;
-            if (plan.places === null) {
-                const placeStatus = plan.sourceStatus.places;
-                placesError = [placeStatus.code, placeStatus.reason]
-                    .filter((value): value is string => Boolean(value))
-                    .join(': ') || 'OpenStreetMap places are unavailable.';
-            }
-            const state: DashboardLocationState = {
-                request,
-                startingLocation: effectiveStartingLocation,
-                startingLocationSource,
-                startingPoint,
-                transitContext,
-                transitError,
-                eventsContext,
-                eventsError,
-                placesContext,
-                placesError,
-                plan,
-            };
-            navigate('/dashboard', { state });
+            setReply(await sendChatMessage(request, []));
         } catch (requestError) {
             setError(
                 requestError instanceof Error
@@ -223,11 +116,12 @@ export default function HomePage() {
                                     onChange={(event) => {
                                         setMessage(event.target.value);
                                         if (error) setError(null);
+                                        setReply(null);
                                     }}
                                     onKeyDown={handleTextareaKeyDown}
                                     placeholder={EXAMPLE_REQUEST}
                                     rows={4}
-                                    aria-describedby="planner-hint planner-status"
+                                    aria-describedby="planner-hint"
                                     aria-invalid={Boolean(error)}
                                     disabled={isLoading}
                                 />
@@ -238,20 +132,9 @@ export default function HomePage() {
                             </div>
                             <div className="planner-support-row">
                                 <p id="planner-hint">Press Ctrl + Enter to plan</p>
-                                <p
-                                    id="planner-status"
-                                    className={isOutingPlannerConfigured || (isTransitApiConfigured && isAuth0ApiConfigured)
-                                        ? 'integration-status configured'
-                                        : 'integration-status'}
-                                >
+                                <p id="planner-status" className="integration-status configured">
                                     <span aria-hidden="true" />
-                                    {isTransitApiConfigured && isAuth0ApiConfigured
-                                        ? 'Secure transit endpoint configured'
-                                        : isTransitApiConfigured
-                                            ? 'Transit Auth0 audience required'
-                                        : isOutingPlannerConfigured
-                                            ? 'Planner endpoint configured'
-                                            : 'Integration preview mode'}
+                                    Gemini assistant connected
                                 </p>
                             </div>
                         </form>
@@ -271,6 +154,13 @@ export default function HomePage() {
                             <p className="planner-error" role="alert" tabIndex={-1} ref={errorRef}>
                                 <strong>We couldn&apos;t start that plan.</strong> {error}
                             </p>
+                        )}
+
+                        {reply && (
+                            <div className="planner-error" role="status" aria-live="polite">
+                                <strong>SmartMove assistant</strong>
+                                <p>{reply}</p>
+                            </div>
                         )}
 
                         {isLoading && (

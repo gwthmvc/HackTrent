@@ -26,8 +26,16 @@ export async function sendChatMessage(
             const errorMessage = typeof responseBody === 'object'
                 && responseBody !== null
                 && 'error' in responseBody
-                && typeof responseBody.error === 'string'
-                ? responseBody.error
+                && typeof responseBody.error === 'object'
+                && responseBody.error !== null
+                && 'message' in responseBody.error
+                && typeof responseBody.error.message === 'string'
+                ? responseBody.error.message
+                : typeof responseBody === 'object'
+                    && responseBody !== null
+                    && 'error' in responseBody
+                    && typeof responseBody.error === 'string'
+                    ? responseBody.error
                 : `Chat request failed with status ${response.status}.`;
             throw new Error(errorMessage);
         }
