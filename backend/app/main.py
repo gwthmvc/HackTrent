@@ -27,7 +27,10 @@ from .models import (
     TransitJourneySearchRequest,
     TransitJourneySearchResponse,
     TransitVehiclesResponse,
+    OutingPlanRequest,
+    OutingPlanResponse,
 )
+from .outings import OutingOrchestrator
 from .repository import TigerDataTransitRepository, TransitPositionReader
 from .service import TransitService
 
@@ -38,6 +41,7 @@ def create_app(
     event_service: TicketmasterEventService | None = None,
     place_service: OverpassPlaceService | None = None,
     journey_service: GtfsJourneyService | None = None,
+    outing_orchestrator: OutingOrchestrator | None = None,
 ) -> FastAPI:
     app_settings = settings or get_settings()
     database = Database(app_settings)
@@ -59,6 +63,9 @@ def create_app(
     app.state.event_service = event_service or TicketmasterEventService(app_settings)
     app.state.place_service = place_service or OverpassPlaceService(app_settings)
     app.state.journey_service = journey_service or GtfsJourneyService(app_settings)
+    app.state.outing_orchestrator = outing_orchestrator or OutingOrchestrator(
+        app.state.event_service, app.state.place_service, app.state.transit_service,
+    )
 
     app.add_middleware(
         CORSMiddleware,
@@ -196,6 +203,26 @@ def create_app(
     ) -> PlaceSearchResponse:
         service: OverpassPlaceService = app.state.place_service
         return service.search(request_body, auth_context.subject)
+
+    @app.post(
+        "/api/outings/generate",
+        response_model=OutingPlanResponse,
+        responses={
+            401: {"model": ErrorResponse},
+            403: {"model": ErrorResponse},
+            422: {"model": ErrorResponse},
+            429: {"model": ErrorResponse},
+            502: {"model": ErrorResponse},
+            503: {"model": ErrorResponse},
+            504: {"model": ErrorResponse},
+        },
+        tags=["outings"],
+    )
+    def generate_outing(
+        request_body: OutingPlanRequest,
+        auth_context: AuthContext = Depends(require_auth),
+    ) -> OutingPlanResponse:
+        return app.state.outing_orchestrator.plan(request_body, auth_context.subject)
 
     return app
 

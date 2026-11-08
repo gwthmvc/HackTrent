@@ -250,3 +250,102 @@ class ErrorBody(ApiModel):
 
 class ErrorResponse(ApiModel):
     error: ErrorBody
+
+
+class OutingPlanRequest(ApiModel):
+    outing_request: str = Field(min_length=2, max_length=2_000)
+    starting_location: str = Field(min_length=2, max_length=240)
+    date: dt.date | None = None
+    time: str | None = Field(default=None, pattern=r"^([01]\d|2[0-3]):[0-5]\d$")
+    interests: list[Annotated[str, Field(min_length=1, max_length=40)]] = Field(
+        default_factory=list, max_length=5,
+    )
+
+
+class OutingDataSource(ApiModel):
+    name: str
+    url: str | None = None
+    retrieved_at: datetime | None = None
+
+
+class OutingRecommendation(ApiModel):
+    id: str
+    name: str
+    description: str | None
+    category: str | None
+    location_id: str | None = None
+    start_at: datetime | None = None
+    end_at: datetime | None = None
+    price_range: EventPriceRange | None = Field(
+        default=None, exclude_if=lambda value: value is None,
+    )
+    source: OutingDataSource
+
+
+class OutingItineraryItem(ApiModel):
+    id: str
+    title: str
+    start_at: datetime
+    end_at: datetime | None = None
+    description: str | None
+    location_id: str | None = None
+    price_range: EventPriceRange | None = Field(
+        default=None, exclude_if=lambda value: value is None,
+    )
+
+
+class TransitObservation(ApiModel):
+    id: str
+    description: str
+    observed_at: datetime
+    freshness: str
+    source: OutingDataSource
+
+
+class OutingTransit(ApiModel):
+    status: Literal["available", "unavailable"]
+    items: list[TransitObservation] | None = None
+    reason: str | None = None
+
+
+class OutingPoliceIncidents(ApiModel):
+    status: Literal["unavailable"] = "unavailable"
+    reason: str
+
+
+class OutingLocation(ApiModel):
+    id: str
+    name: str
+    address: str | None = None
+    latitude: float
+    longitude: float
+    source: OutingDataSource
+
+
+class OutingSourceStatus(ApiModel):
+    status: Literal["available", "unavailable"]
+    code: str | None = None
+    reason: str | None = None
+
+
+class OutingSourceStatuses(ApiModel):
+    events: OutingSourceStatus
+    places: OutingSourceStatus
+    transit: OutingSourceStatus
+
+
+class OutingSummary(ApiModel):
+    title: str
+    description: str
+
+
+class OutingPlanResponse(ApiModel):
+    request_id: str
+    generated_at: datetime
+    summary: OutingSummary
+    recommendations: list[OutingRecommendation]
+    itinerary: list[OutingItineraryItem]
+    transit: OutingTransit
+    police_incidents: OutingPoliceIncidents
+    locations: list[OutingLocation]
+    source_status: OutingSourceStatuses
