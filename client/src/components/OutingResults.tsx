@@ -415,13 +415,6 @@ export default function OutingResults({ plan }: OutingResultsProps) {
                     ))}
                 </section>
 
-                <section className="result-panel safety-panel" aria-labelledby="safety-heading">
-                    <div className="section-number" aria-hidden="true">04</div>
-                    <h3 id="safety-heading">Public incident context</h3>
-                    <p className="unavailable-note">
-                        Police incident information unavailable: {plan.policeIncidents.reason}
-                    </p>
-                </section>
             </div>
 
             <section className="result-panel" aria-labelledby="source-status-heading">
