@@ -44,7 +44,9 @@ function MapBehaviour({ startingPoint, transitVehicles, locations, routes, selec
             ...(startingPoint
                 ? [[startingPoint.latitude, startingPoint.longitude] as [number, number]]
                 : []),
-            ...transitVehicles.map((vehicle) => [vehicle.latitude, vehicle.longitude] as [number, number]),
+            ...(locations.length === 0
+                ? transitVehicles.map((vehicle) => [vehicle.latitude, vehicle.longitude] as [number, number])
+                : []),
             ...locations.map((location) => [location.latitude, location.longitude] as [number, number]),
             ...routePositions,
         ];
