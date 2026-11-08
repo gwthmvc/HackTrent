@@ -2,15 +2,7 @@ import '../styles/HomePage.css'
 import { useState, type FormEvent } from 'react'
 import { useAuth0 } from '@auth0/auth0-react'
 import { Link } from 'react-router'
-
-interface ChatPart {
-    text: string;
-}
-
-interface ChatMessage {
-    role: 'user' | 'model';
-    parts: ChatPart[];
-}
+import { sendChatMessage, type ChatMessage } from '../services/chat'
 
 export default function HomePage() {
     const { logout } = useAuth0();
@@ -38,19 +30,17 @@ export default function HomePage() {
         setLoading(true);
 
         try {
-            const res = await fetch('/api/chat', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message: input, chatHistory: updatedHistory }),
-            });
-
-            const data = (await res.json()) as { reply?: string };
-            const replyText = data.reply || "Error: No response from server.";
+            const replyText = await sendChatMessage(input, updatedHistory);
 
             setChatHistory(prev => [...prev, { role: 'model', parts: [{ text: replyText }] }]);
-        } catch (err) {
-            console.error("Fetch error:", err);
-            setChatHistory(prev => [...prev, { role: 'model', parts: [{ text: "Network error connecting to API." }] }]);
+        } catch (error) {
+            const errorMessage = error instanceof Error
+                ? error.message
+                : 'Unable to connect to the chat service.';
+            setChatHistory(prev => [
+                ...prev,
+                { role: 'model', parts: [{ text: errorMessage }] },
+            ]);
         } finally {
             setLoading(false);
         }
