@@ -164,6 +164,20 @@ def test_events_upstream_failure_is_partial_success():
     assert not response.json()["recommendations"]
 
 
+def test_places_upstream_failure_summary_does_not_report_zero_places():
+    client, _ = make_client(
+        Upstream(ok(tm_payload())),
+        Upstream(httpx.Response(504)),
+    )
+    with client:
+        response = client.post("/api/outings/generate", json=BODY)
+    description = response.json()["summary"]["description"]
+    assert response.status_code == 200
+    assert "0 places" not in description
+    assert "Places could not be searched" in description
+    assert "places_upstream_timeout" in description
+
+
 def test_transit_unsupported_is_partial_success():
     client, _ = make_client(Upstream(ok(tm_payload())), Upstream(ok({"elements": []})))
     with client:

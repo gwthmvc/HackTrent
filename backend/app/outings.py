@@ -198,14 +198,27 @@ class OutingOrchestrator:
                 reason=transit_status.reason or "Transit data is unavailable.",
             )
         )
-        event_count = len(events)
-        place_count = len(places_response.places) if places_response else 0
+        summary_parts = []
+        if event_status.status == "available":
+            summary_parts.append(f"{len(events)} events found.")
+        else:
+            summary_parts.append(
+                f"Events could not be searched ({event_status.code}).",
+            )
+        if place_status.status == "available":
+            summary_parts.append(
+                f"{len(places_response.places) if places_response else 0} places found.",
+            )
+        else:
+            summary_parts.append(
+                f"Places could not be searched ({place_status.code}).",
+            )
         return OutingPlanResponse(
             request_id=str(uuid4()),
             generated_at=datetime.now(timezone.utc),
             summary=OutingSummary(
                 title="Outing plan",
-                description=f"{event_count} events and {place_count} places found.",
+                description=" ".join(summary_parts),
             ),
             recommendations=recommendations,
             itinerary=itinerary,
