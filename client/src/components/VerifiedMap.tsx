@@ -209,6 +209,7 @@ export default function VerifiedMap({
                         key={`transit-${vehicle.agencyId}-${vehicle.vehicleId}`}
                         position={[vehicle.latitude, vehicle.longitude]}
                         icon={transitMarkerIcon(vehicle.freshness.status, vehicle.routeId)}
+                        zIndexOffset={-500}
                     >
                         <Popup>
                             <strong>{vehicle.agencyId === 'durham' ? 'Durham Region Transit' : 'Kingston Transit'} observation</strong>
