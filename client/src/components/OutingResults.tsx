@@ -191,7 +191,7 @@ export default function OutingResults({ plan }: OutingResultsProps) {
 
     const mapLayer = useDashboardMapLayer({
         id: 'plan',
-        label: 'Plan',
+        label: 'Itinerary',
         locations: filteredLocations,
         routes: EMPTY_ROUTES,
         stopNumbers,
