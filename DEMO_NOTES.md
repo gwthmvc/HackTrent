@@ -65,3 +65,16 @@ Say these plainly if asked:
    December 24 request returning zero events with the date named. The exact
    upstream result is unverified; the date is included in the event window
    when that search succeeds.
+
+## Verified demo path (2026-11-08)
+
+- Prompt: "Fun day out with friends the weekend of November 21 in oshawa".
+  Start: Durham College, Oshawa, Ontario. Date and time: blank.
+- Expected: plan summary "5 events found on 2026-11-21"; itinerary lists 5
+  events in time order; places unavailable with `places_upstream_timeout`;
+  transit labelled historical, not live; scheduled Route 901 trips shown with
+  the direct-trips-only caveat.
+- Known display limit: map markers are one per venue, so one marker can
+  represent several events. The itinerary list shows each event.
+- Known limit: a request with a specific departure time filters events to about
+  one hour before through three hours after that time.
