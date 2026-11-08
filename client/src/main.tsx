@@ -1,7 +1,6 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
-import { Auth0Provider } from '@auth0/auth0-react'
 import { createBrowserRouter, RouterProvider } from 'react-router';
 import routes from './routes';
 import { auth0ApiScope, auth0Audience, auth0ClientId, auth0Domain } from './auth/config';

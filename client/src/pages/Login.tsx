@@ -8,6 +8,9 @@ export default function Login() {
     const { error, isAuthenticated, isLoading, loginWithRedirect } = useAuth0();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [localError, setLocalError] = useState<string | null>(null);
+    const [successMessage] = useState<string | null>(
+        () => sessionStorage.getItem('hacktrent_signup_message'),
+    );
     const errorRef = useRef<HTMLParagraphElement>(null);
     const navigate = useNavigate();
 
@@ -16,6 +19,12 @@ export default function Login() {
             navigate('/home', { replace: true });
         }
     }, [isAuthenticated, navigate]);
+
+    useEffect(() => {
+        if (successMessage) {
+            sessionStorage.removeItem('hacktrent_signup_message');
+        }
+    }, [successMessage]);
 
     useEffect(() => {
         if (error || localError) {

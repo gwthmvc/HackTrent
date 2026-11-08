@@ -17,6 +17,12 @@ For GitHub Actions deployments, add repository secrets named
 `VITE_AUTH0_DOMAIN` and `VITE_AUTH0_CLIENT_ID`. The deployment workflow passes
 these values to the production build.
 
+The chat client uses `/api/chat` by default. Local Vite development proxies
+that path to the configured backend. Production hosting must proxy
+`/api/chat` to the backend over HTTPS, or provide a public HTTPS endpoint with
+`VITE_CHAT_API_URL` at build time; browsers block calls from `https://sloo.ca`
+to the backend's HTTP address.
+
 Authentication is handled by Auth0's hosted login page. The login and
 registration pages redirect to Auth0 and then return to `/home`. The `/home`
 and `/dashboard` routes require an authenticated session. Home collects the

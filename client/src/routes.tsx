@@ -8,40 +8,22 @@ import ErrorPage from './pages/ErrorPage';
 import LandingPage from './pages/LandingPage';
 import ProtectedRoute from './components/ProtectedRoute';
 
-const routes: RouteObject[] = [
-  {
+const routes: RouteObject[] = [{
     path: '/',
-    errorElement: <ErrorPage />, // Catches errors for all child routes below
-    element: <Outlet />,         // Required to render the matched child route
+    element: <Auth0ProviderWithNavigate><Outlet /></Auth0ProviderWithNavigate>,
+    errorElement: <ErrorPage />,
     children: [
-  {
-    path: '/',
-    element: <LandingPage />,
-  },
-  {
-    element: <ProtectedRoute />,
-    children: [
-      {
-        path: '/home',
-        element: <HomePage />,
-      },
-      {
-        path: '/dashboard',
-        element: <Dashboard />,
-      },
+        { index: true, element: <LandingPage /> },
+        {
+            element: <ProtectedRoute />,
+            children: [
+                { path: 'home', element: <HomePage /> },
+                { path: 'dashboard', element: <Dashboard /> },
+            ],
+        },
+        { path: 'login', element: <Login /> },
+        { path: 'register', element: <Register /> },
     ],
-  },
-  {
-    path: '/login',
-    element: <Login />,
-  },
-
-  {
-    path: '/register',
-    element: <Register />,
-  },
-],
-},
-];
+}];
 
 export default routes;

@@ -122,13 +122,23 @@
 }
 
 .home-header nav button {
-    padding: 0.65rem 1rem;
-    border: 1px solid var(--home-forest);
-    border-radius: 999px;
+    padding: 0;
+    color: var(--color-cardinal-charcoal);
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+    font: inherit;
+    font-size: 0.8rem;
+    font-weight: 800;
+    text-transform: uppercase;
 }
 
-.home-nav-link:hover,
-.home-header nav button:hover {
+.home-header nav a:hover,
+.home-header nav a:focus-visible,
+.home-header nav button:hover,
+.home-header nav button:focus-visible,
+.map-footer a:hover,
+.map-footer a:focus-visible {
     color: var(--color-cardinal-red);
 }
 

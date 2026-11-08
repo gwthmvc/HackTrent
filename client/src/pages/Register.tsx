@@ -4,18 +4,21 @@ import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router'
 import { isAuth0Configured } from '../auth/config'
 
+const SIGNUP_COMPLETED_KEY = 'hacktrent_signup_completed';
+
 export default function Register() {
-    const { error, isAuthenticated, isLoading, loginWithRedirect } = useAuth0();
+    const { error, isAuthenticated, isLoading, loginWithRedirect, logout } = useAuth0();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [localError, setLocalError] = useState<string | null>(null);
     const errorRef = useRef<HTMLParagraphElement>(null);
+    const handledSignupRef = useRef(false);
     const navigate = useNavigate();
 
     useEffect(() => {
         if (isAuthenticated) {
             navigate('/home', { replace: true });
         }
-    }, [isAuthenticated, navigate]);
+    }, [isAuthenticated, logout, navigate]);
 
     useEffect(() => {
         if (error || localError) {
@@ -31,6 +34,7 @@ export default function Register() {
 
         setLocalError(null);
         setIsSubmitting(true);
+        sessionStorage.setItem(SIGNUP_COMPLETED_KEY, 'true');
         try {
             await loginWithRedirect({
                 appState: { returnTo: '/home' },
@@ -39,6 +43,7 @@ export default function Register() {
                 },
             });
         } catch (registrationError) {
+            sessionStorage.removeItem(SIGNUP_COMPLETED_KEY);
             setLocalError(
                 registrationError instanceof Error
                     ? registrationError.message
