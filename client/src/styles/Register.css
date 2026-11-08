@@ -8,7 +8,7 @@ body:has(.register-container) {
 main:has(.register-container) {
     display: flex;
     flex-direction: column;
-    width: min(100% - 2rem, 76rem);
+    width: min(100% - 2rem, 42rem);
     min-height: 100vh;
     margin-inline: auto;
     padding-bottom: clamp(3rem, 10vw, 6rem);
@@ -16,7 +16,7 @@ main:has(.register-container) {
 
 main:has(.register-container) .landing-header {
     width: 100%;
-    padding: 1.25rem 0;
+    padding: 0.75rem 0 1.5rem;
 }
 
 main:has(.register-container) .landing-brand {
@@ -69,9 +69,8 @@ main:has(.register-container) .landing-brand-mark span:last-child {
     border-left: 0.5rem solid var(--color-bunting-deep-indigo);
 }
 
-.auth-content {
-    width: min(100%, 42rem);
-    margin-inline: auto;
+main:has(.register-container) .auth-content {
+    width: 100%;
 }
 
 main:has(.register-container) h1 {
@@ -141,33 +140,33 @@ main:has(.register-container) .auth-subtitle {
     opacity: 0.7;
 }
 
-.error-container {
+main:has(.register-container) .error-container {
     width: 100%;
     margin: var(--space-lg) 0 0;
 }
 
-.error,
-.success {
+main:has(.register-container) .error,
+main:has(.register-container) .success {
     padding: 0.75rem 1rem;
     color: var(--color-goldfinch-white);
     border-radius: 0.35rem;
     font-weight: 900;
 }
 
-.error {
+main:has(.register-container) .error {
     background: var(--color-cardinal-red);
 }
 
-.success {
+main:has(.register-container) .success {
     background: var(--color-wood-duck-green);
 }
 
-.error:focus {
+main:has(.register-container) .error:focus {
     outline: 4px solid var(--color-bluebird-cerulean);
     outline-offset: 3px;
 }
 
-.auth-links {
+main:has(.register-container) .auth-links {
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
@@ -175,13 +174,13 @@ main:has(.register-container) .auth-subtitle {
     margin-top: var(--space-lg);
 }
 
-.auth-links a {
+main:has(.register-container) .auth-links a {
     color: var(--color-blue-jay-royal-blue);
     font-weight: 800;
     text-underline-offset: 0.2rem;
 }
 
-.auth-links a:focus-visible,
+main:has(.register-container) .auth-links a:focus-visible,
 main:has(.register-container) .landing-brand:focus-visible {
     outline: 3px solid var(--color-goldfinch-gold);
     outline-offset: 4px;
@@ -194,10 +193,10 @@ main:has(.register-container) .landing-brand:focus-visible {
 }
 
 @media (forced-colors: active) {
-    .register-container,
-    .register-container .form-component button,
-    .error,
-    .success {
+    main:has(.register-container) .register-container,
+    main:has(.register-container) .register-container .form-component button,
+    main:has(.register-container) .error,
+    main:has(.register-container) .success {
         border: 2px solid ButtonText;
         box-shadow: none;
     }
