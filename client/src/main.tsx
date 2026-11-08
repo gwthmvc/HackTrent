@@ -13,9 +13,18 @@ createRoot(document.getElementById('root')!).render(
     <Auth0Provider
       domain={auth0Domain}
       clientId={auth0ClientId}
+      cacheLocation="localstorage"
+      useRefreshTokens={true}
       authorizationParams={{
         redirect_uri: window.location.origin,
-        ...(auth0Audience ? { audience: auth0Audience, scope: auth0ApiScope } : {}),
+        ...(auth0Audience
+          ? {
+            audience: auth0Audience,
+            scope: ['openid', 'profile', 'email', 'offline_access', auth0ApiScope]
+              .filter(Boolean)
+              .join(' '),
+          }
+          : {}),
       }}
     >
       <RouterProvider router={router} />

@@ -3,9 +3,9 @@ import { useDashboardMapLayer } from './useDashboardMapLayer';
 import type {
     DataSource,
     ItineraryStop,
-    Money,
     OutingPlan,
     OutingRecommendation,
+    PriceRange,
     VerifiedLocation,
     VerifiedRoute,
 } from '../types/outing';
@@ -39,18 +39,19 @@ function formatDateTime(value: string): string {
     }).format(date);
 }
 
-function formatMoney(money: Money): string {
+function formatPriceRange(priceRange: PriceRange): string {
     try {
-        return new Intl.NumberFormat('en-CA', {
+        const formatter = new Intl.NumberFormat('en-CA', {
             style: 'currency',
-            currency: money.currency,
-        }).format(money.amount);
+            currency: priceRange.currency,
+        });
+        return `${formatter.format(priceRange.min)} – ${formatter.format(priceRange.max)}`;
     } catch {
-        return `${money.amount} ${money.currency}`;
+        return `${priceRange.min} – ${priceRange.max} ${priceRange.currency}`;
     }
 }
 
-function safeSourceUrl(url?: string): string | undefined {
+function safeSourceUrl(url?: string | null): string | undefined {
     if (!url) return undefined;
     try {
         const parsedUrl = new URL(url);
@@ -124,8 +125,6 @@ export default function OutingResults({ plan }: OutingResultsProps) {
     const filteredLocations = useMemo(() => plan.locations.filter((location) => (
         filteredCards.some((card) => card.location?.id === location.id)
     )), [filteredCards, plan.locations]);
-    const routes = plan.routes ?? EMPTY_ROUTES;
-
     const selectFromMap = useCallback((locationId: string) => {
         const card = filteredCards.find((candidate) => candidate.location?.id === locationId);
         if (card) {
@@ -138,7 +137,7 @@ export default function OutingResults({ plan }: OutingResultsProps) {
         id: 'plan',
         label: 'Plan',
         locations: filteredLocations,
-        routes,
+        routes: EMPTY_ROUTES,
         stopNumbers,
         onSelectLocation: selectFromMap,
     });
@@ -227,8 +226,8 @@ export default function OutingResults({ plan }: OutingResultsProps) {
                                                 <p className="result-kicker">{card.recommendation?.category ?? (card.stop ? 'Itinerary stop' : 'Verified location')}</p>
                                                 <h4>{title}</h4>
                                             </div>
-                                            {card.recommendation?.price
-                                                ? <strong>{formatMoney(card.recommendation.price)}</strong>
+                                            {card.recommendation?.priceRange
+                                                ? <strong>{formatPriceRange(card.recommendation.priceRange)}</strong>
                                                 : <span className="result-unavailable-inline">Price unavailable</span>}
                                         </div>
                                         {description && <p>{description}</p>}
@@ -259,7 +258,9 @@ export default function OutingResults({ plan }: OutingResultsProps) {
                                     <div>
                                         <div className="result-card-heading">
                                             <h4>{stop.title}</h4>
-                                            {stop.cost ? <strong>{formatMoney(stop.cost)}</strong> : <span className="result-unavailable-inline">Cost unavailable</span>}
+                                            {stop.priceRange
+                                                ? <strong>{formatPriceRange(stop.priceRange)}</strong>
+                                                : <span className="result-unavailable-inline">Price unavailable</span>}
                                         </div>
                                         {stop.endAt && <p className="result-meta">Until {formatDateTime(stop.endAt)}</p>}
                                         {stop.description && <p>{stop.description}</p>}
@@ -292,23 +293,30 @@ export default function OutingResults({ plan }: OutingResultsProps) {
                 <section className="result-panel safety-panel" aria-labelledby="safety-heading">
                     <div className="section-number" aria-hidden="true">03</div>
                     <h3 id="safety-heading">Public incident context</h3>
-                    {plan.policeIncidents.status === 'available' ? (
-                        plan.policeIncidents.items.length > 0 ? (
-                            <div className="observation-list">
-                                {plan.policeIncidents.items.map((incident) => (
-                                    <article key={incident.id}>
-                                        <div className="result-card-heading"><h4>{incident.type}</h4><time dateTime={incident.occurredAt}>{formatDateTime(incident.occurredAt)}</time></div>
-                                        <p>{incident.area}</p>
-                                        <p className="coverage-note">Geographic limitation: {incident.geographicLimitations}</p>
-                                        <SourceLine source={incident.source} />
-                                    </article>
-                                ))}
-                            </div>
-                        ) : <p className="unavailable-note">Police incident information unavailable: no verified records were returned.</p>
-                    ) : <p className="unavailable-note">Police incident information unavailable: {plan.policeIncidents.reason}</p>}
-                    {plan.policeIncidents.coverage && <p className="coverage-note">Dataset coverage: {plan.policeIncidents.coverage}</p>}
+                    <p className="unavailable-note">
+                        Police incident information unavailable: {plan.policeIncidents.reason}
+                    </p>
                 </section>
             </div>
+
+            <section className="result-panel" aria-labelledby="source-status-heading">
+                <h3 id="source-status-heading">Source status</h3>
+                <ul>
+                    {(['events', 'places', 'transit'] as const).map((sourceName) => {
+                        const status = plan.sourceStatus[sourceName];
+                        return (
+                            <li key={sourceName}>
+                                <strong>{sourceName}: {status.status}</strong>
+                                {status.status === 'unavailable' && (
+                                    <span>
+                                        {status.code && ` (${status.code})`}: {status.reason ?? 'Reason unavailable'}
+                                    </span>
+                                )}
+                            </li>
+                        );
+                    })}
+                </ul>
+            </section>
         </section>
     );
 }

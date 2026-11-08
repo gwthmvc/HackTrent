@@ -116,6 +116,7 @@ export default function HomePage() {
 
         setIsLoading(true);
         try {
+            let accessToken: string | undefined;
             let transitContext: DashboardLocationState['transitContext'];
             let transitError: string | undefined;
             let eventsContext: DashboardLocationState['eventsContext'];
@@ -132,7 +133,6 @@ export default function HomePage() {
                 eventsError = 'Auth0 API audience is not configured for secure event search.';
                 placesError = 'Auth0 API audience is not configured for secure place search.';
             } else {
-                let accessToken: string | undefined;
                 try {
                     accessToken = await getAccessTokenSilently({
                         authorizationParams: {
@@ -206,10 +206,14 @@ export default function HomePage() {
                 return;
             }
 
+            if (!accessToken) {
+                throw new Error('Auth0 API audience is not configured for secure trip planning.');
+            }
+
             const plan = await generateOuting({
-                message: request,
+                outingRequest: request,
                 startingLocation: effectiveStartingLocation,
-            });
+            }, accessToken);
             const state: DashboardLocationState = {
                 request,
                 startingLocation: effectiveStartingLocation,

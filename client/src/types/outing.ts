@@ -1,23 +1,24 @@
 export type DataSource = {
     name: string;
-    url?: string;
-    retrievedAt?: string;
+    url?: string | null;
+    retrievedAt?: string | null;
 };
 
-export type Money = {
-    amount: number;
+export type PriceRange = {
+    min: number;
+    max: number;
     currency: string;
 };
 
 export type OutingRecommendation = {
     id: string;
     name: string;
-    description: string;
-    category?: string;
-    locationId?: string;
-    startAt?: string;
-    endAt?: string;
-    price?: Money;
+    description: string | null;
+    category?: string | null;
+    locationId?: string | null;
+    startAt?: string | null;
+    endAt?: string | null;
+    priceRange?: PriceRange;
     source: DataSource;
 };
 
@@ -25,10 +26,10 @@ export type ItineraryStop = {
     id: string;
     title: string;
     startAt: string;
-    endAt?: string;
-    description?: string;
-    locationId?: string;
-    cost?: Money;
+    endAt?: string | null;
+    description?: string | null;
+    locationId?: string | null;
+    priceRange?: PriceRange;
 };
 
 export type TransitObservation = {
@@ -39,19 +40,10 @@ export type TransitObservation = {
     source: DataSource;
 };
 
-export type PoliceIncident = {
-    id: string;
-    type: string;
-    occurredAt: string;
-    area: string;
-    geographicLimitations: string;
-    source: DataSource;
-};
-
 export type VerifiedLocation = {
     id: string;
     name: string;
-    address?: string;
+    address?: string | null;
     latitude: number;
     longitude: number;
     source: DataSource;
@@ -83,6 +75,18 @@ export type Availability<T> = {
     retrievedAt?: string;
 };
 
+export type SourceStatus = {
+    status: 'available' | 'unavailable';
+    code?: string | null;
+    reason?: string | null;
+};
+
+export type OutingSourceStatuses = {
+    events: SourceStatus;
+    places: SourceStatus;
+    transit: SourceStatus;
+};
+
 export type OutingPlan = {
     requestId: string;
     generatedAt: string;
@@ -93,13 +97,18 @@ export type OutingPlan = {
     recommendations: OutingRecommendation[];
     itinerary: ItineraryStop[];
     transit: Availability<TransitObservation>;
-    policeIncidents: Availability<PoliceIncident>;
+    policeIncidents: {
+        status: 'unavailable';
+        reason: string;
+    };
     locations: VerifiedLocation[];
-    startingLocation?: VerifiedLocation;
-    routes?: VerifiedRoute[];
+    sourceStatus: OutingSourceStatuses;
 };
 
 export type GenerateOutingRequest = {
-    message: string;
+    outingRequest: string;
     startingLocation: string;
+    date?: string;
+    time?: string;
+    interests?: string[];
 };

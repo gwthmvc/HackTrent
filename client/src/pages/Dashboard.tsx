@@ -89,7 +89,7 @@ export default function Dashboard() {
     const { logout } = useAuth0();
     const location = useLocation();
     const state = location.state as DashboardLocationState | null;
-    const startingPoint = state?.plan?.startingLocation ?? state?.startingPoint;
+    const startingPoint = state?.startingPoint;
 
     const handleLogout = () => {
         void logout({

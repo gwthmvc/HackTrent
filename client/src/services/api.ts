@@ -5,22 +5,22 @@ import type {
     ItineraryStop,
     OutingPlan,
     OutingRecommendation,
-    PoliceIncident,
+    PriceRange,
     TransitObservation,
     VerifiedLocation,
-    VerifiedRoute,
 } from '../types/outing';
 
-const GENERATE_OUTING_URL = import.meta.env.VITE_SMARTMOVE_GENERATE_URL?.trim();
+const API_BASE_URL = import.meta.env.VITE_SMARTMOVE_API_URL?.trim().replace(/\/$/, '');
 const API_TIMEOUT_MS = 30_000;
 
 type ApiErrorResponse = {
-    message?: string;
-    error?: string;
-    detail?: string;
+    error?: {
+        code?: string;
+        message?: string;
+    };
 };
 
-export const isOutingPlannerConfigured = Boolean(GENERATE_OUTING_URL);
+export const isOutingPlannerConfigured = Boolean(API_BASE_URL);
 
 function isObject(value: unknown): value is Record<string, unknown> {
     return typeof value === 'object' && value !== null;
@@ -30,21 +30,23 @@ function isString(value: unknown): value is string {
     return typeof value === 'string' && value.trim().length > 0;
 }
 
-function isOptionalString(value: unknown): value is string | undefined {
-    return value === undefined || typeof value === 'string';
+function isNullableString(value: unknown): value is string | null | undefined {
+    return value === undefined || value === null || typeof value === 'string';
 }
 
 function isSource(value: unknown): value is DataSource {
     return isObject(value)
         && isString(value.name)
-        && isOptionalString(value.url)
-        && isOptionalString(value.retrievedAt);
+        && isNullableString(value.url)
+        && isNullableString(value.retrievedAt);
 }
 
-function isMoney(value: unknown): boolean {
+function isPriceRange(value: unknown): value is PriceRange {
     return isObject(value)
-        && typeof value.amount === 'number'
-        && Number.isFinite(value.amount)
+        && typeof value.min === 'number'
+        && Number.isFinite(value.min)
+        && typeof value.max === 'number'
+        && Number.isFinite(value.max)
         && isString(value.currency);
 }
 
@@ -52,12 +54,12 @@ function isRecommendation(value: unknown): value is OutingRecommendation {
     return isObject(value)
         && isString(value.id)
         && isString(value.name)
-        && isString(value.description)
-        && isOptionalString(value.category)
-        && isOptionalString(value.locationId)
-        && isOptionalString(value.startAt)
-        && isOptionalString(value.endAt)
-        && (value.price === undefined || isMoney(value.price))
+        && isNullableString(value.description)
+        && isNullableString(value.category)
+        && isNullableString(value.locationId)
+        && isNullableString(value.startAt)
+        && isNullableString(value.endAt)
+        && (value.priceRange === undefined || isPriceRange(value.priceRange))
         && isSource(value.source);
 }
 
@@ -66,10 +68,10 @@ function isItineraryStop(value: unknown): value is ItineraryStop {
         && isString(value.id)
         && isString(value.title)
         && isString(value.startAt)
-        && isOptionalString(value.endAt)
-        && isOptionalString(value.description)
-        && isOptionalString(value.locationId)
-        && (value.cost === undefined || isMoney(value.cost));
+        && isNullableString(value.endAt)
+        && isNullableString(value.description)
+        && isNullableString(value.locationId)
+        && (value.priceRange === undefined || isPriceRange(value.priceRange));
 }
 
 function isTransitObservation(value: unknown): value is TransitObservation {
@@ -81,21 +83,11 @@ function isTransitObservation(value: unknown): value is TransitObservation {
         && isSource(value.source);
 }
 
-function isPoliceIncident(value: unknown): value is PoliceIncident {
-    return isObject(value)
-        && isString(value.id)
-        && isString(value.type)
-        && isString(value.occurredAt)
-        && isString(value.area)
-        && isString(value.geographicLimitations)
-        && isSource(value.source);
-}
-
 function isLocation(value: unknown): value is VerifiedLocation {
     return isObject(value)
         && isString(value.id)
         && isString(value.name)
-        && isOptionalString(value.address)
+        && isNullableString(value.address)
         && typeof value.latitude === 'number'
         && value.latitude >= -90
         && value.latitude <= 90
@@ -105,41 +97,19 @@ function isLocation(value: unknown): value is VerifiedLocation {
         && isSource(value.source);
 }
 
-function isRoute(value: unknown): value is VerifiedRoute {
+function isSourceStatus(value: unknown): boolean {
     return isObject(value)
-        && isString(value.id)
-        && Array.isArray(value.coordinates)
-        && value.coordinates.length >= 2
-        && value.coordinates.every((coordinate) => (
-            isObject(coordinate)
-            && typeof coordinate.latitude === 'number'
-            && coordinate.latitude >= -90
-            && coordinate.latitude <= 90
-            && typeof coordinate.longitude === 'number'
-            && coordinate.longitude >= -180
-            && coordinate.longitude <= 180
-        ))
-        && isSource(value.source)
-        && isOptionalString(value.mode)
-        && isOptionalString(value.fromLocationId)
-        && isOptionalString(value.toLocationId);
+        && (value.status === 'available' || value.status === 'unavailable')
+        && isNullableString(value.code)
+        && isNullableString(value.reason);
 }
 
-function isAvailability<T>(
-    value: unknown,
-    itemGuard: (item: unknown) => item is T,
-): value is Availability<T> {
-    if (!isObject(value) || !isOptionalString(value.coverage) || !isOptionalString(value.retrievedAt)) {
-        return false;
-    }
-
-    if (value.status === 'unavailable') {
-        return isString(value.reason);
-    }
-
+function isTransit(value: unknown): value is Availability<TransitObservation> {
+    if (!isObject(value)) return false;
+    if (value.status === 'unavailable') return isString(value.reason);
     return value.status === 'available'
         && Array.isArray(value.items)
-        && value.items.every(itemGuard);
+        && value.items.every(isTransitObservation);
 }
 
 function isOutingPlan(value: unknown): value is OutingPlan {
@@ -153,19 +123,23 @@ function isOutingPlan(value: unknown): value is OutingPlan {
         && value.recommendations.every(isRecommendation)
         && Array.isArray(value.itinerary)
         && value.itinerary.every(isItineraryStop)
-        && isAvailability(value.transit, isTransitObservation)
-        && isAvailability(value.policeIncidents, isPoliceIncident)
+        && isTransit(value.transit)
+        && isObject(value.policeIncidents)
+        && value.policeIncidents.status === 'unavailable'
+        && isString(value.policeIncidents.reason)
         && Array.isArray(value.locations)
         && value.locations.every(isLocation)
-        && (value.startingLocation === undefined || isLocation(value.startingLocation))
-        && (value.routes === undefined
-            || (Array.isArray(value.routes) && value.routes.every(isRoute)));
+        && isObject(value.sourceStatus)
+        && isSourceStatus(value.sourceStatus.events)
+        && isSourceStatus(value.sourceStatus.places)
+        && isSourceStatus(value.sourceStatus.transit);
 }
 
 export async function generateOuting(
     request: GenerateOutingRequest,
+    accessToken: string,
 ): Promise<OutingPlan> {
-    if (!GENERATE_OUTING_URL) {
+    if (!API_BASE_URL) {
         throw new Error(
             'Trip planning is unavailable because the backend generation endpoint is not configured.',
         );
@@ -176,9 +150,10 @@ export async function generateOuting(
 
     let response: Response;
     try {
-        response = await fetch(GENERATE_OUTING_URL, {
+        response = await fetch(`${API_BASE_URL}/api/outings/generate`, {
             method: 'POST',
             headers: {
+                Authorization: `Bearer ${accessToken}`,
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify(request),
@@ -206,7 +181,7 @@ export async function generateOuting(
         const apiError = typeof responseBody === 'object' && responseBody !== null
             ? responseBody as ApiErrorResponse
             : undefined;
-        const message = apiError?.message ?? apiError?.error ?? apiError?.detail
+        const message = apiError?.error?.message
             ?? (typeof responseBody === 'string' ? responseBody : undefined)
             ?? `Request failed with status ${response.status}`;
 
