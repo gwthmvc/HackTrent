@@ -114,5 +114,8 @@ body {
   --color-kestrel-terracotta:        #BA5A31;
   --color-kestrel-warm-cream:        #FFF1E6;
   --color-kestrel-midnight-black:    #1A1A1A;
-}
 
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+}
